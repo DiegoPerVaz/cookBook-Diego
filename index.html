@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhD Lab Notebook – Diego</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#protocols">Lab <span>Notebook</span></a>
+  <div class="nav-tabs">
+
+    <a class="nav-tab" id="nav-protocols" href="#protocols">
+      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M9 5H7a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h0a2 2 0 002-2M9 5a2 2 0 012-2h0a2 2 0 012 2"/>
+        <path d="M9 12l1.5 1.5L13 10" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Protocols</span>
+    </a>
+
+    <a class="nav-tab" id="nav-literature" href="#literature">
+      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Literature</span>
+    </a>
+
+    <a class="nav-tab" id="nav-data" href="#data">
+      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+        <ellipse cx="10" cy="5" rx="7" ry="2.5"/>
+        <path d="M3 5v4c0 1.38 3.13 2.5 7 2.5S17 10.38 17 9V5"/>
+        <path d="M3 9v4c0 1.38 3.13 2.5 7 2.5S17 14.38 17 13V9"/>
+        <path d="M3 13v4c0 1.38 3.13 2.5 7 2.5S17 18.38 17 17v-4" stroke-linecap="round"/>
+      </svg>
+      <span>Data</span>
+    </a>
+
+    <a class="nav-tab" id="nav-calendar" href="#calendar">
+      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="3" y="4" width="14" height="14" rx="2"/>
+        <path d="M7 2v2M13 2v2M3 8h14" stroke-linecap="round"/>
+        <path d="M7 12h2M11 12h2M7 15h2" stroke-linecap="round"/>
+      </svg>
+      <span>Calendar</span>
+    </a>
+
+  </div>
+</nav>
+
+<!-- ══════════════════════════════ PROTOCOLS ══════════════════════════════ -->
+<div class="page" id="page-protocols">
+  <div class="page-header">
+    <h1>Protocols</h1>
+    <p>Step-by-step lab protocols for scRNA-seq, CITE-seq, and bioinformatics workflows.</p>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="9" cy="9" r="6"/><path d="M15 15l3 3" stroke-linecap="round"/>
+    </svg>
+    <input type="text" id="proto-search" placeholder="Search protocols…">
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+    <div class="filter-bar" style="margin-bottom:0">
+      <button class="filter-btn proto-filter-btn active" id="proto-filter-all">All</button>
+      <button class="filter-btn proto-filter-btn" id="proto-filter-scrna">scRNA-seq</button>
+      <button class="filter-btn proto-filter-btn" id="proto-filter-cite">CITE-seq</button>
+      <button class="filter-btn proto-filter-btn" id="proto-filter-bio">Bioinformatics</button>
+    </div>
+    <button class="btn btn-primary" id="btn-add-protocol">+ Add Protocol</button>
+  </div>
+
+  <div class="add-form" id="form-add-protocol">
+    <h3>Add New Protocol</h3>
+    <div class="form-row"><label>Title *</label><input id="pf-title" type="text" placeholder="e.g. FACS sorting for T cells"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+      <div class="form-row"><label>Category</label>
+        <select id="pf-category">
+          <option>scRNA-seq</option><option>CITE-seq</option><option>Bioinformatics</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Estimated time</label><input id="pf-time" type="text" placeholder="e.g. ~4 h"></div>
+    </div>
+    <div class="form-row"><label>Reagents / software needed</label><input id="pf-reagents" type="text" placeholder="comma-separated"></div>
+    <div class="form-row"><label>Notes / tips</label><textarea id="pf-notes" placeholder="Critical tips, common pitfalls…"></textarea></div>
+    <div class="form-actions">
+      <button class="btn" id="proto-form-cancel">Cancel</button>
+      <button class="btn btn-primary" id="proto-form-save">Save</button>
+    </div>
+  </div>
+
+  <div id="protocols-list"></div>
+</div>
+
+<!-- ══════════════════════════════ LITERATURE ══════════════════════════════ -->
+<div class="page" id="page-literature">
+  <div class="page-header">
+    <h1>Literature</h1>
+    <p>Key papers in single-cell biology, immunology, and computational methods.</p>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="9" cy="9" r="6"/><path d="M15 15l3 3" stroke-linecap="round"/>
+    </svg>
+    <input type="text" id="lit-search" placeholder="Search by title, author, or tag…">
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+    <div class="filter-bar" style="margin-bottom:0">
+      <button class="filter-btn lit-filter-btn active" id="lit-filter-all">All</button>
+      <button class="filter-btn lit-filter-btn" id="lit-filter-methods">Methods</button>
+      <button class="filter-btn lit-filter-btn" id="lit-filter-immunology">Immunology</button>
+      <button class="filter-btn lit-filter-btn" id="lit-filter-review">Review</button>
+    </div>
+    <button class="btn btn-primary" id="btn-add-paper">+ Add Paper</button>
+  </div>
+
+  <div class="add-form" id="form-add-paper">
+    <h3>Add Paper</h3>
+    <div class="form-row"><label>Title *</label><input id="lf-title" type="text" placeholder="Full paper title"></div>
+    <div class="form-row"><label>Authors</label><input id="lf-authors" type="text" placeholder="e.g. Smith J, Doe A, et al."></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+      <div class="form-row"><label>Journal &amp; year</label><input id="lf-journal" type="text" placeholder="e.g. Nature, 2023 · DOI: ..."></div>
+      <div class="form-row"><label>Category</label>
+        <select id="lf-category"><option>Methods</option><option>Immunology</option><option>Review</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="form-row"><label>Abstract / summary</label><textarea id="lf-abstract" placeholder="Brief description of what makes this paper relevant…"></textarea></div>
+    <div class="form-row"><label>DOI / URL</label><input id="lf-url" type="text" placeholder="https://doi.org/..."></div>
+    <div class="form-row"><label>Tags (comma-separated)</label><input id="lf-tags" type="text" placeholder="e.g. PBMC, T cells, Seurat"></div>
+    <div class="form-actions">
+      <button class="btn" id="paper-form-cancel">Cancel</button>
+      <button class="btn btn-primary" id="paper-form-save">Save</button>
+    </div>
+  </div>
+
+  <div id="papers-list"></div>
+</div>
+
+<!-- ══════════════════════════════ DATA ══════════════════════════════ -->
+<div class="page" id="page-data">
+  <div class="page-header">
+    <h1>Data</h1>
+    <p>Track important datasets, public resources, and local data paths.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem">
+    <div class="data-stat">
+      <div class="num" id="stat-datasets">0</div>
+      <div class="label">Datasets tracked</div>
+    </div>
+    <div class="data-stat">
+      <div class="num" id="stat-types">0</div>
+      <div class="label">Modality types</div>
+    </div>
+    <div class="data-stat">
+      <div class="num">GEO</div>
+      <div class="label">Primary source</div>
+    </div>
+    <div class="data-stat">
+      <div class="num">10x</div>
+      <div class="label">Platform</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
+    <h2 class="section-title" style="margin:0;flex:1">Datasets</h2>
+    <button class="btn btn-primary" id="btn-add-dataset">+ Add Dataset</button>
+  </div>
+
+  <div class="add-form" id="form-add-dataset">
+    <h3>Add Dataset</h3>
+    <div class="form-row"><label>Name *</label><input id="df-name" type="text" placeholder="e.g. PBMCs 10k (10x)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+      <div class="form-row"><label>Modality</label>
+        <select id="df-type"><option>scRNA-seq</option><option>CITE-seq</option><option>Bulk RNA-seq</option><option>ATAC-seq</option><option>Other</option></select>
+      </div>
+      <div class="form-row"><label>Number of cells</label><input id="df-cells" type="text" placeholder="e.g. 10,000"></div>
+    </div>
+    <div class="form-row"><label>Description</label><textarea id="df-desc" placeholder="What is this dataset? Why is it relevant?"></textarea></div>
+    <div class="form-row"><label>Local path</label><input id="df-path" type="text" placeholder="e.g. /mnt/data/project/"></div>
+    <div class="form-row"><label>Source URL</label><input id="df-url" type="text" placeholder="https://www.ncbi.nlm.nih.gov/geo/..."></div>
+    <div class="form-row"><label>Tags (comma-separated)</label><input id="df-tags" type="text" placeholder="e.g. PBMC, benchmark, healthy"></div>
+    <div class="form-actions">
+      <button class="btn" id="dataset-form-cancel">Cancel</button>
+      <button class="btn btn-primary" id="dataset-form-save">Save</button>
+    </div>
+  </div>
+
+  <div class="grid-2" id="datasets-list" style="margin-top:1rem"></div>
+
+  <h2 class="section-title" style="margin-top:2.5rem">Useful Resources</h2>
+  <div class="grid-3">
+    <a href="https://www.ncbi.nlm.nih.gov/geo/" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>NCBI GEO</h3>
+      <p>Gene Expression Omnibus — public repository for sequencing and microarray data.</p>
+      <span class="badge badge-green" style="margin-top:8px">Database</span>
+    </a>
+    <a href="https://www.10xgenomics.com/datasets" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>10x Genomics Datasets</h3>
+      <p>Official benchmark and example datasets from 10x Genomics for Chromium, Visium, and more.</p>
+      <span class="badge badge-blue" style="margin-top:8px">Platform</span>
+    </a>
+    <a href="https://cellxgene.cziscience.com/" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>CZ CELLxGENE</h3>
+      <p>Chan Zuckerberg CELLxGENE data portal with millions of cells across tissues and species.</p>
+      <span class="badge badge-purple" style="margin-top:8px">Atlas</span>
+    </a>
+    <a href="https://www.ebi.ac.uk/gxa/sc/home" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>Single Cell Expression Atlas</h3>
+      <p>EBI's curated single-cell gene expression data across multiple species and conditions.</p>
+      <span class="badge badge-orange" style="margin-top:8px">Atlas</span>
+    </a>
+    <a href="https://human.brain-map.org/" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>Human Cell Atlas</h3>
+      <p>International initiative mapping every cell type in the human body.</p>
+      <span class="badge badge-green" style="margin-top:8px">Atlas</span>
+    </a>
+    <a href="https://panglaodb.se/" target="_blank" class="card" style="text-decoration:none;color:inherit">
+      <h3>PanglaoDB</h3>
+      <p>Database of cell type marker genes useful for scRNA-seq cluster annotation.</p>
+      <span class="badge badge-blue" style="margin-top:8px">Markers</span>
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ CALENDAR ══════════════════════════════ -->
+<div class="page" id="page-calendar">
+  <div class="page-header">
+    <h1>Calendar</h1>
+    <p>Upcoming events, seminars, lab meetings, and deadlines at your institute.</p>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn" id="cal-prev">←</button>
+      <strong id="cal-month-label" style="font-size:15px;min-width:160px;text-align:center"></strong>
+      <button class="btn" id="cal-next">→</button>
+    </div>
+    <button class="btn btn-primary" id="btn-add-event">+ Add Event</button>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;padding:1rem">
+    <div class="calendar-grid" id="cal-grid"></div>
+  </div>
+
+  <div class="add-form" id="form-add-event">
+    <h3>Add Event</h3>
+    <div class="form-row"><label>Title *</label><input id="ef-title" type="text" placeholder="e.g. Lab Meeting"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem">
+      <div class="form-row"><label>Date *</label><input id="ef-date" type="date"></div>
+      <div class="form-row"><label>Time</label><input id="ef-time" type="time" value="10:00"></div>
+      <div class="form-row"><label>Type</label>
+        <select id="ef-type"><option value="meeting">Lab meeting</option><option value="seminar">Seminar</option><option value="deadline">Deadline</option><option value="social">Social / retreat</option></select>
+      </div>
+    </div>
+    <div class="form-row"><label>Location</label><input id="ef-location" type="text" placeholder="Room / building"></div>
+    <div class="form-row"><label>Notes</label><textarea id="ef-notes" placeholder="What to bring, links…"></textarea></div>
+    <div class="form-actions">
+      <button class="btn" id="event-form-cancel">Cancel</button>
+      <button class="btn btn-primary" id="event-form-save">Save Event</button>
+    </div>
+  </div>
+
+  <h2 class="section-title">Upcoming Events</h2>
+  <div style="display:flex;gap:12px;margin-bottom:1rem;flex-wrap:wrap;font-size:13px;color:var(--text-2)">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent);display:inline-block"></span>Lab meeting</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--purple);display:inline-block"></span>Seminar</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#c0392b;display:inline-block"></span>Deadline</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent-2);display:inline-block"></span>Social</span>
+  </div>
+  <div id="events-list"></div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
