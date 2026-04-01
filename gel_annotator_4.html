@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gel Annotator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0e14; --surface: #111720; --surface2: #181f2c;
+    --border: #1e2a3a; --accent: #00d4aa; --accent2: #0099ff;
+    --text: #e8f0f8; --text-dim: #6b7f96;
+    --ladder: #ffd166; --pos: #06d6a0; --neg: #ef476f; --sample: #00d4aa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(0,212,170,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,0.03) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+
+  .app { position:relative; z-index:1; max-width:1340px; margin:0 auto; padding:24px 18px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .logo-icon { width:40px; height:40px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+  h1 { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+  h1 span { color:var(--accent); }
+  .subtitle { font-size:10px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; margin-top:2px; }
+
+  .grid { display:grid; grid-template-columns:340px 1fr; gap:16px; align-items:start; }
+
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; }
+  .panel:last-child { margin-bottom:0; }
+  .panel-title { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:12px; font-family:'JetBrains Mono',monospace; display:flex; align-items:center; gap:8px; }
+  .panel-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:20px 14px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--surface2); position:relative; }
+  .upload-zone:hover,.upload-zone.drag-over { border-color:var(--accent); background:rgba(0,212,170,0.05); }
+  .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .upload-icon { font-size:22px; margin-bottom:5px; }
+  .upload-label { font-size:11px; color:var(--text-dim); }
+  .upload-label strong { color:var(--accent); }
+
+  /* ruler */
+  .ruler-wrap { background:var(--surface2); border-radius:8px; padding:10px 12px; margin-bottom:12px; border:1px solid var(--border); }
+  .ruler-title { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:8px; letter-spacing:1px; text-transform:uppercase; }
+  .ruler-controls { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .ruler-group label { display:block; font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:4px; }
+  .ruler-group input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
+  .val-tag { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--accent); float:right; }
+  .ruler-bar { position:relative; height:14px; margin-top:8px; background:var(--surface); border-radius:4px; overflow:hidden; }
+  .ruler-fill { position:absolute; top:0; bottom:0; background:linear-gradient(90deg,var(--accent2),var(--accent)); opacity:0.3; border-radius:4px; transition:all 0.1s; }
+  .ruler-marker { position:absolute; top:0; bottom:0; width:2px; transition:left 0.1s; }
+  .ruler-marker.first { background:var(--accent2); }
+  .ruler-marker.last  { background:var(--accent); }
+  .ruler-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); pointer-events:none; }
+
+  /* lanes */
+  .lane-row { display:flex; align-items:center; gap:5px; padding:3px 5px; border-radius:6px; background:var(--surface2); border:1px solid transparent; transition:border-color 0.15s; margin-bottom:3px; }
+  .lane-row:hover { border-color:var(--border); }
+  .lane-num { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); width:18px; text-align:right; flex-shrink:0; }
+  .type-btn { font-size:9px; font-weight:700; padding:2px 4px; border-radius:4px; font-family:'JetBrains Mono',monospace; flex-shrink:0; width:48px; text-align:center; border:none; cursor:pointer; transition:all 0.15s; outline:none; }
+  .type-sample { background:rgba(0,212,170,0.12); color:var(--sample); }
+  .type-ladder { background:rgba(255,209,102,0.2); color:var(--ladder); }
+  .type-pos    { background:rgba(6,214,160,0.2);   color:var(--pos); }
+  .type-neg    { background:rgba(239,71,111,0.2);  color:var(--neg); }
+  .lane-input { flex:1; background:transparent; border:none; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; outline:none; min-width:0; }
+  .lane-input::placeholder { color:var(--text-dim); opacity:0.4; }
+  .del-btn { background:none; border:none; cursor:pointer; color:var(--text-dim); font-size:13px; padding:0 2px; line-height:1; transition:color 0.15s; flex-shrink:0; }
+  .del-btn:hover { color:var(--neg); }
+  #sampleList { max-height:230px; overflow-y:auto; padding-right:2px; }
+  #sampleList::-webkit-scrollbar { width:3px; }
+  #sampleList::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* extra annotations */
+  .ea-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+  .ea-label { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); width:72px; flex-shrink:0; }
+  .ea-input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; padding:5px 8px; outline:none; transition:border-color 0.2s; }
+  .ea-input:focus { border-color:var(--accent); }
+  .ea-color { width:30px; height:28px; border:1px solid var(--border); border-radius:6px; background:var(--surface2); cursor:pointer; padding:2px; flex-shrink:0; }
+
+  /* band rows */
+  .band-row { display:flex; align-items:center; gap:5px; margin-bottom:5px; }
+  .band-geno { width:52px; background:var(--surface2); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:10px; padding:4px 6px; outline:none; transition:border-color 0.2s; flex-shrink:0; }
+  .band-geno:focus { border-color:var(--accent); }
+  .band-size { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:10px; padding:4px 6px; outline:none; transition:border-color 0.2s; }
+  .band-size:focus { border-color:var(--accent); }
+  .band-del { background:none; border:none; cursor:pointer; color:var(--text-dim); font-size:13px; transition:color 0.15s; }
+  .band-del:hover { color:var(--neg); }
+
+  /* position controls for info block */
+  .pos-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .pos-group label { display:block; font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:3px; }
+  .pos-group input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
+
+  .paste-area textarea { width:100%; height:56px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 8px; resize:none; outline:none; transition:border-color 0.2s; }
+  .paste-area textarea:focus { border-color:var(--accent); }
+  .paste-hint { font-size:9px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; margin-top:3px; }
+
+  .ctrl-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ctrl-group label { display:block; font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:4px; }
+  .ctrl-group input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
+  .ctrl-group input[type=color] { width:100%; height:28px; border:1px solid var(--border); border-radius:6px; background:var(--surface2); cursor:pointer; padding:2px; }
+  .ctrl-group select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; padding:5px 7px; outline:none; cursor:pointer; }
+
+  .btn { display:flex; align-items:center; justify-content:center; gap:7px; padding:8px 14px; border-radius:8px; font-family:'Syne',sans-serif; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.2s; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#000; width:100%; margin-top:10px; padding:10px; font-size:13px; }
+  .btn-primary:hover { opacity:0.88; transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
+  .btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border); flex:1; }
+  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-secondary:disabled { opacity:0.35; cursor:not-allowed; }
+  .btn-row { display:flex; gap:8px; margin-top:8px; }
+  .btn-xs { font-size:10px; padding:4px 9px; border-radius:6px; background:var(--surface2); color:var(--text-dim); border:1px solid var(--border); cursor:pointer; font-family:'JetBrains Mono',monospace; transition:all 0.15s; }
+  .btn-xs:hover { color:var(--accent); border-color:var(--accent); }
+
+  .canvas-panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; }
+  .canvas-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:var(--surface2); border-radius:10px; min-height:360px; overflow:auto; }
+  .canvas-placeholder { text-align:center; color:var(--text-dim); }
+  .canvas-placeholder .big-icon { font-size:42px; margin-bottom:10px; opacity:0.35; }
+  .canvas-placeholder p { font-size:12px; }
+  #outputCanvas { max-width:100%; display:none; border-radius:4px; }
+
+  .status { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); padding:6px 10px; background:var(--surface2); border-radius:6px; margin-top:8px; border-left:3px solid var(--accent); display:none; }
+  .status.visible { display:block; }
+  .status.error { border-left-color:var(--neg); color:var(--neg); }
+  .scount { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--text-dim); }
+  .scount span { color:var(--accent); }
+  .add-lane-row { display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+
+  .toggle-section { cursor:pointer; user-select:none; }
+  .toggle-section .arrow { transition:transform 0.2s; display:inline-block; margin-right:4px; font-size:9px; }
+  .toggle-section.collapsed .arrow { transform:rotate(-90deg); }
+  .collapsible { overflow:hidden; transition:max-height 0.25s ease; }
+  .collapsible.collapsed { max-height:0 !important; }
+
+  @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo-icon">🧬</div>
+    <div>
+      <h1>Gel <span>Annotator</span></h1>
+      <div class="subtitle">// flexible lane labelling · strain info · band sizes</div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ══ LEFT ══ -->
+    <div>
+
+      <!-- 01 Upload -->
+      <div class="panel">
+        <div class="panel-title">01 · Upload Gel Image</div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.tif,.tiff">
+          <div class="upload-icon">🔬</div>
+          <div class="upload-label"><strong>Click or drag</strong> your gel image<br>PNG · JPEG · TIFF</div>
+        </div>
+      </div>
+
+      <!-- 02 Lane Setup -->
+      <div class="panel">
+        <div class="panel-title">02 · Lane Setup</div>
+        <div class="paste-area" style="margin-bottom:9px">
+          <textarea id="pasteBox" placeholder="Paste Mouse IDs (one per line or comma-separated)…"></textarea>
+          <div class="paste-hint">↑ paste from tracker then click Fill ↓</div>
+          <div class="btn-row" style="margin-top:5px">
+            <button class="btn-xs" onclick="fillFromPaste()">⬇ Fill samples</button>
+            <button class="btn-xs" onclick="clearSamples()">✕ Clear</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+          <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text-dim)">LANES &nbsp;<span style="font-size:8px">(click badge to cycle type)</span></span>
+          <span class="scount" id="sampleCount"><span>0</span>/0 filled</span>
+        </div>
+        <div id="sampleList"></div>
+        <div class="add-lane-row">
+          <button class="btn-xs" onclick="addLane('sample')">＋ Sample</button>
+          <button class="btn-xs" onclick="addLane('ladder')" style="color:var(--ladder)">＋ Ladder</button>
+          <button class="btn-xs" onclick="addLane('pos')"    style="color:var(--pos)">＋ Pos</button>
+          <button class="btn-xs" onclick="addLane('neg')"    style="color:var(--neg)">＋ Neg</button>
+        </div>
+        <div style="margin-top:7px">
+          <button class="btn-xs" style="width:100%" onclick="loadPreset()">↺ Reset to default (Ldr · 20 samples · Pos · Neg · Ldr)</button>
+        </div>
+      </div>
+
+      <!-- 03 Extra Annotations -->
+      <div class="panel">
+        <div class="panel-title toggle-section" onclick="toggleSection('extraBody','extraArrow')">
+          <span class="arrow" id="extraArrow">▾</span>03 · Strain &amp; Band Info
+        </div>
+        <div class="collapsible" id="extraBody" style="max-height:600px">
+
+          <!-- Strain name -->
+          <div class="ea-row">
+            <span class="ea-label">Strain name</span>
+            <input class="ea-input" id="strainName" placeholder="e.g. Cre;Rosa26" oninput="redraw()">
+            <input type="color" class="ea-color" id="strainColor" value="#ffffff" oninput="redraw()">
+          </div>
+
+          <!-- PCR / reaction label -->
+          <div class="ea-row">
+            <span class="ea-label">PCR reaction</span>
+            <input class="ea-input" id="pcrLabel" placeholder="e.g. PCR-1 (Cre)" oninput="redraw()">
+          </div>
+
+          <!-- Band sizes table -->
+          <div style="margin-top:10px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font: size 9px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);letter-spacing:1px">EXPECTED BANDS</span>
+              <button class="btn-xs" onclick="addBand()">＋ Add band</button>
+            </div>
+            <!-- Header row -->
+            <div style="display:flex;gap:5px;margin-bottom:4px;padding:0 2px">
+              <span style="font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);width:52px;flex-shrink:0">Genotype</span>
+              <span style="font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);flex:1">Band size(s)</span>
+            </div>
+            <div id="bandList"></div>
+          </div>
+
+          <!-- Info block position -->
+          <div style="margin-top:10px">
+            <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);margin-bottom:6px;letter-spacing:1px">INFO BLOCK POSITION</div>
+            <div class="pos-grid">
+              <div class="pos-group">
+                <label>X position <span class="val-tag" id="infoXVal">2%</span></label>
+                <input type="range" id="infoX" min="0" max="90" value="2"
+                  oninput="document.getElementById('infoXVal').textContent=this.value+'%';redraw()">
+              </div>
+              <div class="pos-group">
+                <label>Y position <span class="val-tag" id="infoYVal">2%</span></label>
+                <input type="range" id="infoY" min="0" max="90" value="2"
+                  oninput="document.getElementById('infoYVal').textContent=this.value+'%';redraw()">
+              </div>
+              <div class="pos-group">
+                <label>Font size <span class="val-tag" id="infoFontVal">14px</span></label>
+                <input type="range" id="infoFont" min="8" max="64" value="14"
+                  oninput="document.getElementById('infoFontVal').textContent=this.value+'px';redraw()">
+              </div>
+              <div class="pos-group">
+                <label>Opacity <span class="val-tag" id="infoOpacVal">90%</span></label>
+                <input type="range" id="infoOpac" min="10" max="100" value="90"
+                  oninput="document.getElementById('infoOpacVal').textContent=this.value+'%';redraw()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Show/hide toggle -->
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="showInfo" checked onchange="redraw()" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer">
+            <label for="showInfo" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);cursor:pointer">Show info block on image</label>
+          </div>
+
+        </div><!-- end collapsible -->
+      </div>
+
+      <!-- 04 Style -->
+      <div class="panel">
+        <div class="panel-title toggle-section" onclick="toggleSection('styleBody','styleArrow')">
+          <span class="arrow" id="styleArrow">▾</span>04 · Lane Label Style
+        </div>
+        <div class="collapsible" id="styleBody" style="max-height:600px">
+          <div class="ctrl-grid">
+            <div class="ctrl-group">
+              <label>Font size <span class="val-tag" id="fontSizeVal">18px</span></label>
+              <input type="range" id="fontSize" min="8" max="96" value="18"
+                oninput="document.getElementById('fontSizeVal').textContent=this.value+'px';redraw()">
+            </div>
+            <div class="ctrl-group">
+              <label>Label offset <span class="val-tag" id="offsetVal">12px</span></label>
+              <input type="range" id="labelOffset" min="0" max="300" value="12"
+                oninput="document.getElementById('offsetVal').textContent=this.value+'px';redraw()">
+            </div>
+            <div class="ctrl-group">
+              <label>Sample colour</label>
+              <input type="color" id="textColor" value="#00ffcc" oninput="redraw()">
+            </div>
+            <div class="ctrl-group">
+              <label>Rotation</label>
+              <select id="rotation" onchange="redraw()">
+                <option value="0">Horizontal</option>
+                <option value="-45" selected>–45°</option>
+                <option value="-90">Vertical</option>
+              </select>
+            </div>
+            <div class="ctrl-group">
+              <label>Label position</label>
+              <select id="labelPos" onchange="onLabelPosChange()">
+                <option value="top" selected>Top of image</option>
+                <option value="middle">Middle of image</option>
+                <option value="bottom">Bottom of image</option>
+              </select>
+            </div>
+            <div class="ctrl-group">
+              <label>Background</label>
+              <select id="bgStyle" onchange="redraw()">
+                <option value="none">None</option>
+                <option value="pill" selected>Pill</option>
+                <option value="line">Underline</option>
+              </select>
+            </div>
+          </div>
+          <div id="middleYWrap" style="display:none;margin-top:10px">
+            <div class="ctrl-group">
+              <label>Vertical position <span class="val-tag" id="middleYVal">50%</span></label>
+              <input type="range" id="middleY" min="1" max="99" value="50"
+                oninput="document.getElementById('middleYVal').textContent=this.value+'%';redraw()">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="annotateBtn" onclick="redraw()" disabled>✦ Annotate Gel</button>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="downloadBtn" onclick="downloadImage()" disabled>⬇ Download PNG</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end left -->
+
+    <!-- ══ RIGHT ══ -->
+    <div class="canvas-panel">
+      <div class="panel-title">Preview</div>
+
+      <!-- Ruler -->
+      <div class="ruler-wrap">
+        <div class="ruler-title">▸ Lane positions — adjust to align labels with gel lanes</div>
+        <div class="ruler-controls">
+          <div class="ruler-group">
+            <label>First lane X &nbsp;<span class="val-tag" id="firstXVal">5%</span></label>
+            <input type="range" id="firstLaneX" min="0" max="49" value="5"
+              oninput="document.getElementById('firstXVal').textContent=this.value+'%';updateRuler();redraw()">
+          </div>
+          <div class="ruler-group">
+            <label>Last lane X &nbsp;<span class="val-tag" id="lastXVal">95%</span></label>
+            <input type="range" id="lastLaneX" min="51" max="100" value="95"
+              oninput="document.getElementById('lastXVal').textContent=this.value+'%';updateRuler();redraw()">
+          </div>
+        </div>
+        <div class="ruler-bar">
+          <div class="ruler-fill" id="rulerFill"></div>
+          <div class="ruler-marker first" id="rulerFirst"></div>
+          <div class="ruler-marker last"  id="rulerLast"></div>
+          <div class="ruler-label">lane spread</div>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <div class="canvas-placeholder" id="placeholder">
+          <div class="big-icon">🧫</div>
+          <p>Upload a gel image to begin</p>
+        </div>
+        <canvas id="outputCanvas"></canvas>
+      </div>
+      <div class="status" id="statusBar"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let loadedImage = null;
+let lanes = [];
+let bands = []; // [{geno, size}]
+
+const TYPES       = ['sample','ladder','pos','neg'];
+const TYPE_LABELS = { sample:'SMPL', ladder:'LDR', pos:'POS', neg:'NEG' };
+const TYPE_COLORS = { ladder:'#ffd166', pos:'#06d6a0', neg:'#ef476f' };
+const GENO_COLORS = { WT:'#a8d8a8', Het:'#ffd166', Hom:'#ef476f', KI:'#0099ff', KO:'#ff6b35' };
+
+// ── Collapsible sections ───────────────────────────────────────────────────────
+function toggleSection(bodyId, arrowId) {
+  const body  = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  const isOpen = body.style.maxHeight !== '0px' && body.style.maxHeight !== '';
+  if (isOpen) {
+    body.style.maxHeight = '0px';
+    arrow.parentElement.classList.add('collapsed');
+  } else {
+    body.style.maxHeight = '600px';
+    arrow.parentElement.classList.remove('collapsed');
+  }
+}
+
+// ── Lanes ─────────────────────────────────────────────────────────────────────
+function loadPreset() {
+  lanes = [];
+  lanes.push({ type:'ladder', label:'Ladder' });
+  for (let i=0;i<20;i++) lanes.push({ type:'sample', label:'' });
+  lanes.push({ type:'pos', label:'Pos' });
+  lanes.push({ type:'neg', label:'Neg' });
+  lanes.push({ type:'ladder', label:'Ladder' });
+  renderLaneList(); updateSampleCount();
+  if (loadedImage) redraw();
+}
+
+function addLane(type) {
+  const def = { ladder:'Ladder', pos:'Pos', neg:'Neg', sample:'' };
+  lanes.push({ type, label:def[type] });
+  renderLaneList(); updateSampleCount();
+  if (loadedImage) redraw();
+  setTimeout(() => { const l=document.getElementById('sampleList'); l.scrollTop=l.scrollHeight; }, 50);
+}
+
+function deleteLane(i) {
+  lanes.splice(i,1); renderLaneList(); updateSampleCount();
+  if (loadedImage) redraw();
+}
+
+function cycleLaneType(i) {
+  const idx = TYPES.indexOf(lanes[i].type);
+  lanes[i].type = TYPES[(idx+1)%TYPES.length];
+  const def = { ladder:'Ladder', pos:'Pos', neg:'Neg', sample:'' };
+  if (lanes[i].type !== 'sample') lanes[i].label = def[lanes[i].type];
+  renderLaneList();
+  if (loadedImage) redraw();
+}
+
+function renderLaneList() {
+  const list = document.getElementById('sampleList');
+  const st = list.scrollTop;
+  list.innerHTML = '';
+  lanes.forEach((lane,i) => {
+    const row = document.createElement('div');
+    row.className='lane-row';
+    const num=document.createElement('div'); num.className='lane-num'; num.textContent=i+1;
+    const tb=document.createElement('button');
+    tb.className=`type-btn type-${lane.type}`; tb.textContent=TYPE_LABELS[lane.type];
+    tb.title='Click to cycle type'; tb.onclick=()=>cycleLaneType(i);
+    const inp=document.createElement('input'); inp.type='text'; inp.className='lane-input';
+    inp.value=lane.label; inp.placeholder=lane.type==='sample'?`Sample ${i+1}`:TYPE_LABELS[lane.type];
+    inp.addEventListener('input',e=>{ lane.label=e.target.value; updateSampleCount(); if(loadedImage)redraw(); });
+    const del=document.createElement('button'); del.className='del-btn'; del.textContent='×';
+    del.onclick=()=>deleteLane(i);
+    row.appendChild(num); row.appendChild(tb); row.appendChild(inp); row.appendChild(del);
+    list.appendChild(row);
+  });
+  list.scrollTop=st;
+}
+
+function updateSampleCount() {
+  const sl=lanes.filter(l=>l.type==='sample');
+  const filled=sl.filter(l=>l.label.trim()!=='').length;
+  document.getElementById('sampleCount').innerHTML=`<span>${filled}</span>/${sl.length} filled`;
+  const has=loadedImage!==null;
+  document.getElementById('annotateBtn').disabled=!has;
+  document.getElementById('downloadBtn').disabled=!has;
+}
+
+function fillFromPaste() {
+  const ids=document.getElementById('pasteBox').value.split(/[\n,\t]+/).map(s=>s.trim()).filter(Boolean);
+  const sl=lanes.filter(l=>l.type==='sample');
+  ids.forEach((id,i)=>{ if(i<sl.length) sl[i].label=id; });
+  renderLaneList(); updateSampleCount(); if(loadedImage)redraw();
+}
+
+function clearSamples() {
+  lanes.filter(l=>l.type==='sample').forEach(l=>l.label='');
+  document.getElementById('pasteBox').value='';
+  renderLaneList(); updateSampleCount(); if(loadedImage)redraw();
+}
+
+// ── Bands ─────────────────────────────────────────────────────────────────────
+function addBand(geno='', size='') {
+  bands.push({ geno, size });
+  renderBandList();
+  if (loadedImage) redraw();
+}
+
+function deleteBand(i) {
+  bands.splice(i,1); renderBandList(); if(loadedImage)redraw();
+}
+
+function renderBandList() {
+  const list=document.getElementById('bandList');
+  list.innerHTML='';
+  bands.forEach((band,i) => {
+    const row=document.createElement('div'); row.className='band-row';
+    const gi=document.createElement('input'); gi.className='band-geno'; gi.value=band.geno; gi.placeholder='WT';
+    gi.addEventListener('input',e=>{ band.geno=e.target.value; if(loadedImage)redraw(); });
+    const si=document.createElement('input'); si.className='band-size'; si.value=band.size; si.placeholder='300bp';
+    si.addEventListener('input',e=>{ band.size=e.target.value; if(loadedImage)redraw(); });
+    const del=document.createElement('button'); del.className='band-del'; del.textContent='×';
+    del.onclick=()=>deleteBand(i);
+    row.appendChild(gi); row.appendChild(si); row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+
+// ── Label position ─────────────────────────────────────────────────────────────
+function onLabelPosChange() {
+  const v=document.getElementById('labelPos').value;
+  document.getElementById('middleYWrap').style.display=v==='middle'?'block':'none';
+  redraw();
+}
+
+// ── Ruler ─────────────────────────────────────────────────────────────────────
+function updateRuler() {
+  const f=parseInt(document.getElementById('firstLaneX').value);
+  const l=parseInt(document.getElementById('lastLaneX').value);
+  document.getElementById('rulerFill').style.left=f+'%';
+  document.getElementById('rulerFill').style.width=(l-f)+'%';
+  document.getElementById('rulerFirst').style.left=f+'%';
+  document.getElementById('rulerLast').style.left=l+'%';
+}
+updateRuler();
+
+// ── Upload ─────────────────────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0])loadFile(e.target.files[0]); });
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('drag-over'); if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]); });
+
+function loadFile(file) {
+  setStatus('Loading…');
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      loadedImage=img;
+      document.getElementById('placeholder').style.display='none';
+      document.getElementById('outputCanvas').style.display='block';
+      updateSampleCount();
+      setStatus(`Loaded: ${img.width}×${img.height}px · ${file.name}`);
+      redraw();
+    };
+    img.onerror=()=>setStatus('Could not load. For TIFF, export as PNG from your gel doc software first.',true);
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Draw helpers ──────────────────────────────────────────────────────────────
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+// ── Draw info block ───────────────────────────────────────────────────────────
+function drawInfoBlock(ctx, imgW, imgH, PAD_TOP) {
+  const show    = document.getElementById('showInfo').checked;
+  if (!show) return;
+
+  const strain  = document.getElementById('strainName').value.trim();
+  const pcr     = document.getElementById('pcrLabel').value.trim();
+  const color   = document.getElementById('strainColor').value;
+  const fs      = parseInt(document.getElementById('infoFont').value);
+  const xPct    = parseInt(document.getElementById('infoX').value)/100;
+  const yPct    = parseInt(document.getElementById('infoY').value)/100;
+  const opacity = parseInt(document.getElementById('infoOpac').value)/100;
+
+  if (!strain && !pcr && bands.length===0) return;
+
+  // build lines
+  const lines = [];
+  if (strain) lines.push({ text: strain, bold: true, color });
+  if (pcr)    lines.push({ text: pcr,    bold: false, color: '#aac4dd' });
+  if (bands.length > 0) {
+    lines.push({ text: '─── Expected bands ───', bold: false, color: '#4a6070', small: true });
+    bands.forEach(b => {
+      const genoTxt = b.geno.trim() || '?';
+      const sizeTxt = b.size.trim() || '—';
+      const gc = GENO_COLORS[genoTxt] || '#cccccc';
+      lines.push({ text: `${genoTxt}: ${sizeTxt}`, bold: false, color: gc });
+    });
+  }
+
+  if (lines.length === 0) return;
+
+  ctx.save();
+  ctx.globalAlpha = opacity;
+
+  const LINE_H = fs * 1.5;
+  const smallFs = Math.max(fs * 0.75, 8);
+  const blockH = lines.reduce((h, l) => h + (l.small ? smallFs * 1.5 : LINE_H), 0) + 16;
+  const blockW = (() => {
+    let max = 0;
+    lines.forEach(l => {
+      ctx.font = `${l.bold?'bold ':''} ${l.small?smallFs:fs}px "JetBrains Mono", monospace`;
+      const w = ctx.measureText(l.text).width;
+      if (w > max) max = w;
+    });
+    return max + 24;
+  })();
+
+  const bx = xPct * imgW;
+  const by = PAD_TOP + yPct * imgH;
+
+  // shadow / background card
+  ctx.fillStyle = 'rgba(8,13,22,0.88)';
+  rr(ctx, bx-2, by-2, blockW+4, blockH+4, 8);
+  ctx.fill();
+
+  // accent left bar
+  ctx.fillStyle = color;
+  ctx.fillRect(bx, by, 3, blockH);
+
+  // border
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  rr(ctx, bx, by, blockW, blockH, 7);
+  ctx.stroke();
+
+  // text
+  let curY = by + 12;
+  lines.forEach(l => {
+    const lfs = l.small ? smallFs : fs;
+    ctx.font = `${l.bold ? 'bold ' : ''}${lfs}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = l.color;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    ctx.fillText(l.text, bx + 12, curY);
+    curY += lfs * 1.5;
+  });
+
+  ctx.restore();
+}
+
+// ── Main draw ─────────────────────────────────────────────────────────────────
+function redraw() {
+  if (!loadedImage) return;
+
+  const canvas   = document.getElementById('outputCanvas');
+  const fontSize = parseInt(document.getElementById('fontSize').value);
+  const offset   = parseInt(document.getElementById('labelOffset').value);
+  const textColor= document.getElementById('textColor').value;
+  const rotation = parseFloat(document.getElementById('rotation').value);
+  const labelPos = document.getElementById('labelPos').value;
+  const bgStyle  = document.getElementById('bgStyle').value;
+  const firstPct = parseInt(document.getElementById('firstLaneX').value)/100;
+  const lastPct  = parseInt(document.getElementById('lastLaneX').value)/100;
+  const midYPct  = parseInt(document.getElementById('middleY').value)/100;
+
+  const PAD_TOP = labelPos==='top'    ? Math.max(fontSize*4, 60) : 0;
+  const PAD_BOT = labelPos==='bottom' ? Math.max(fontSize*4, 60) : 0;
+
+  canvas.width  = loadedImage.width;
+  canvas.height = loadedImage.height + PAD_TOP + PAD_BOT;
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0e14';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(loadedImage, 0, PAD_TOP, loadedImage.width, loadedImage.height);
+
+  const n = lanes.length;
+  const startX = firstPct * loadedImage.width;
+  const endX   = lastPct  * loadedImage.width;
+  const step   = n>1 ? (endX-startX)/(n-1) : 0;
+
+  ctx.font = `bold ${fontSize}px "JetBrains Mono", monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  lanes.forEach((lane,i) => {
+    const lbl = lane.label.trim();
+    if (!lbl) return;
+    const x = startX + i*step;
+    let y;
+    if (labelPos==='top')         y = PAD_TOP - offset - fontSize*0.6;
+    else if (labelPos==='bottom') y = PAD_TOP + loadedImage.height + offset + fontSize*0.6;
+    else                          y = PAD_TOP + loadedImage.height * midYPct + offset;
+
+    const color = TYPE_COLORS[lane.type] || textColor;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rotation*Math.PI/180);
+    const tw = ctx.measureText(lbl).width; const th = fontSize;
+    if (bgStyle==='pill') {
+      const p=5; ctx.fillStyle='rgba(8,12,20,0.82)';
+      rr(ctx,-tw/2-p,-th/2-p,tw+p*2,th+p*2,5); ctx.fill();
+    } else if (bgStyle==='line') {
+      ctx.strokeStyle=color; ctx.lineWidth=2; ctx.globalAlpha=0.45;
+      ctx.beginPath(); ctx.moveTo(-tw/2,th/2+3); ctx.lineTo(tw/2,th/2+3); ctx.stroke(); ctx.globalAlpha=1;
+    }
+    ctx.fillStyle=color; ctx.fillText(lbl,0,0); ctx.restore();
+  });
+
+  // tick marks
+  ctx.globalAlpha=0.22;
+  lanes.forEach((lane,i) => {
+    const x=Math.round(startX+i*step);
+    ctx.strokeStyle=TYPE_COLORS[lane.type]||'#00ffcc'; ctx.lineWidth=1;
+    ctx.beginPath();
+    if (labelPos==='top')         { ctx.moveTo(x,PAD_TOP-3); ctx.lineTo(x,PAD_TOP+10); }
+    else if (labelPos==='bottom') { ctx.moveTo(x,PAD_TOP+loadedImage.height-10); ctx.lineTo(x,PAD_TOP+loadedImage.height+3); }
+    else { const ty=PAD_TOP+loadedImage.height*midYPct; ctx.moveTo(x,ty-14); ctx.lineTo(x,ty+14); }
+    ctx.stroke();
+  });
+  ctx.globalAlpha=1;
+
+  // info block
+  drawInfoBlock(ctx, loadedImage.width, loadedImage.height, PAD_TOP);
+
+  document.getElementById('downloadBtn').disabled=false;
+  setStatus(`✦ ${lanes.filter(l=>l.label.trim()).length}/${lanes.length} lanes labelled`);
+}
+
+function downloadImage() {
+  const a=document.createElement('a');
+  a.download='annotated_gel.png';
+  a.href=document.getElementById('outputCanvas').toDataURL('image/png');
+  a.click(); setStatus('✦ Saved as annotated_gel.png');
+}
+
+function setStatus(msg,isError=false) {
+  const el=document.getElementById('statusBar');
+  el.textContent=msg; el.className='status visible'+(isError?' error':'');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadPreset();
+// Default bands
+addBand('WT','300bp'); addBand('Het','300+500bp'); addBand('Hom','500bp');
+</script>
+</body>
+</html>
