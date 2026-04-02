@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data & Analysis — PhD Workspace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #F5F0E8;
+      --bg-deep: #EDE7DB;
+      --fg: #2C2416;
+      --fg-muted: #8A7E6B;
+      --accent: #C0582A;
+      --accent-hover: #A84A22;
+      --card: #FDFAF5;
+      --card-border: #E0D8CA;
+      --shadow: rgba(44, 36, 22, 0.06);
+      --shadow-lg: rgba(44, 36, 22, 0.1);
+      --tag-bg: #EDE4D4;
+      --danger: #B83B2E;
+      --danger-hover: #9A2F24;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1A1714;
+      --bg-deep: #141210;
+      --fg: #E8E0D4;
+      --fg-muted: #8A7E6B;
+      --accent: #D4713E;
+      --accent-hover: #E8854F;
+      --card: #23201B;
+      --card-border: #3A352D;
+      --shadow: rgba(0,0,0,0.2);
+      --shadow-lg: rgba(0,0,0,0.35);
+      --tag-bg: #2E2A23;
+      --danger: #D4524A;
+      --danger-hover: #E0645C;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      transition: background-color 0.4s ease, color 0.4s ease;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 { font-family: 'Source Serif 4', serif; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    .ambient-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.1;
+      transition: opacity 0.4s ease;
+    }
+    [data-theme="dark"] .ambient-blob { opacity: 0.05; }
+
+    .blob-1 {
+      width: 450px; height: 450px;
+      background: #7A6B8A;
+      top: -120px; left: -80px;
+      animation: blobFloat1 22s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 350px; height: 350px;
+      background: var(--accent);
+      bottom: -80px; right: -60px;
+      animation: blobFloat2 28s ease-in-out infinite;
+    }
+
+    @keyframes blobFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, 20px) scale(1.06); }
+      66% { transform: translate(-20px, -15px) scale(0.94); }
+    }
+    @keyframes blobFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-25px, -30px) scale(1.07); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 20px var(--shadow-lg);
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 6px 0;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link i { transition: transform 0.2s ease; }
+    .back-link:hover i { transform: translateX(-3px); }
+
+    /* Input fields */
+    .form-input {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.4s ease;
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--fg-muted); opacity: 0.5; }
+
+    /* Buttons */
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-accent:hover { background: var(--accent-hover); }
+    .btn-accent:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-danger-ghost {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-danger-ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* Link items */
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--fg);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .link-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .link-item:hover::after { opacity: 0.04; }
+    .link-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow-lg);
+    }
+
+    .link-icon {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: background 0.4s ease;
+    }
+
+    .link-text { position: relative; z-index: 1; flex: 1; min-width: 0; }
+    .link-arrow {
+      margin-left: auto;
+      color: var(--fg-muted);
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s ease, color 0.2s ease;
+      flex-shrink: 0;
+    }
+    .link-item:hover .link-arrow { transform: translateX(4px); color: var(--accent); }
+
+    .link-delete {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      background: none;
+      border: none;
+      color: var(--fg-muted);
+      opacity: 0;
+      cursor: pointer;
+      padding: 6px;
+      font-size: 14px;
+      transition: opacity 0.2s ease, color 0.2s ease;
+    }
+    .link-item:hover .link-delete { opacity: 1; }
+    .link-delete:hover { color: var(--danger); }
+
+    .link-url-preview {
+      font-size: 12px;
+      color: var(--fg-muted);
+      opacity: 0.6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+      margin-top: 2px;
+    }
+
+    /* Category badges */
+    .cat-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--tag-bg);
+      color: var(--fg-muted);
+      margin-right: 6px;
+      transition: background 0.4s ease;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.25s ease;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Category select */
+    .form-select {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.4s ease;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A7E6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .form-select:focus { border-color: var(--accent); }
+
+    /* Category filter pills */
+    .filter-pill {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--fg-muted);
+      opacity: 0.5;
+    }
+    .empty-state i { font-size: 36px; margin-bottom: 12px; display: block; }
+
+    /* Add form card inner */
+    .add-form-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    @media (max-width: 640px) {
+      .add-form-inner { grid-template-columns: 1fr; }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--fg);
+      color: var(--bg);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 8px 30px var(--shadow-lg);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+    .fade-up-d1 { animation-delay: 0.06s; }
+    .fade-up-d2 { animation-delay: 0.14s; }
+    .fade-up-d3 { animation-delay: 0.22s; }
+    .fade-up-d4 { animation-delay: 0.30s; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Confirm modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 28px 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 16px 48px var(--shadow-lg);
+      transform: scale(0.95);
+      transition: transform 0.25s ease, background 0.4s ease, border-color 0.4s ease;
+    }
+    .modal-overlay.open .modal-box { transform: scale(1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient background -->
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
+
+  <!-- Header -->
+  <header style="position: relative; z-index: 1; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto;">
+    <div class="fade-up">
+      <a href="index.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Workspace
+      </a>
+      <h1 style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-top: 8px;">Data & Analysis</h1>
+      <p style="font-size: 14px; color: var(--fg-muted); font-weight: 300; margin-top: 4px;" id="linkCount">0 links saved</p>
+    </div>
+    <div class="fade-up fade-up-d1" style="display: flex; align-items: center; gap: 12px;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main style="position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 32px 80px;">
+
+    <!-- Add new link card -->
+    <section class="card fade-up fade-up-d2" style="padding: 24px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+        <i class="fa-solid fa-plus" style="font-size: 13px; color: var(--accent);"></i>
+        <h2 style="font-size: 15px; font-weight: 700;">Add New Link</h2>
+      </div>
+      <form id="addForm" autocomplete="off">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="add-form-inner">
+            <div>
+              <label style="font-size: 12px; color: var(--fg-muted); display: block; margin-bottom: 4px;">Title</label>
+              <input type="text" class="form-input" id="inputTitle" placeholder="e.g. RNA-seq pipeline notebook" required>
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--fg-muted); display: block; margin-bottom: 4px;">URL</label>
+              <input type="url" class="form-input" id="inputUrl" placeholder="https://..." required>
+            </div>
+            <button type="submit" class="btn-accent" style="height: 42px;">Add</button>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <label style="font-size: 12px; color: var(--fg-muted); display: block; margin-bottom: 4px;">Description (optional)</label>
+              <input type="text" class="form-input" id="inputDesc" placeholder="Brief note about this resource">
+            </div>
+            <div style="min-width: 150px;">
+              <label style="font-size: 12px; color: var(--fg-muted); display: block; margin-bottom: 4px;">Category</label>
+              <select class="form-select" id="inputCat" style="width: 100%; height: 42px;">
+                <option value="Dataset">Dataset</option>
+                <option value="Script">Script</option>
+                <option value="Notebook">Notebook</option>
+                <option value="Pipeline">Pipeline</option>
+                <option value="Visualization">Visualization</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filter pills -->
+    <div class="fade-up fade-up-d3" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="filterBar">
+      <button class="filter-pill active" data-filter="All">All</button>
+      <button class="filter-pill" data-filter="Dataset">Datasets</button>
+      <button class="filter-pill" data-filter="Script">Scripts</button>
+      <button class="filter-pill" data-filter="Notebook">Notebooks</button>
+      <button class="filter-pill" data-filter="Pipeline">Pipelines</button>
+      <button class="filter-pill" data-filter="Visualization">Visualizations</button>
+      <button class="filter-pill" data-filter="Other">Other</button>
+    </div>
+
+    <!-- Links list -->
+    <div id="linksList" class="fade-up fade-up-d4">
+      <div class="empty-state" id="emptyState">
+        <i class="fa-solid fa-database"></i>
+        <p style="font-size: 15px;">No links added yet</p>
+        <p style="font-size: 13px; margin-top: 4px;">Add datasets, scripts, notebooks, or any analysis resources above.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Remove this link?</h3>
+      <p style="font-size: 14px; color: var(--fg-muted); margin-bottom: 24px;" id="deleteModalText">This action cannot be undone.</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-ghost" id="deleteCancel">Cancel</button>
+        <button class="btn-accent" id="deleteConfirm" style="background: var(--danger);">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // === Theme ===
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+
+    function setTheme(theme) {
+      htmlEl.setAttribute('data-theme', theme);
+      localStorage.setItem('phd_theme', theme);
+      themeToggle.querySelector('i').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    const savedTheme = localStorage.getItem('phd_theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+    themeToggle.addEventListener('click', () => {
+      setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // === Category icon/color mapping ===
+    const catMeta = {
+      Dataset:       { icon: 'fa-solid fa-table-cells',       bg: '#D8E4DC', color: '#4A6B58' },
+      Script:        { icon: 'fa-solid fa-code',              bg: '#DDD6E8', color: '#6B5878' },
+      Notebook:      { icon: 'fa-solid fa-book',              bg: '#E4D8D0', color: '#8B6050' },
+      Pipeline:      { icon: 'fa-solid fa-diagram-project',   bg: '#D0D8E4', color: '#506888' },
+      Visualization: { icon: 'fa-solid fa-chart-scatter-bubble', bg: '#E8DDD0', color: '#7A6650' },
+      Other:         { icon: 'fa-solid fa-link',              bg: 'var(--tag-bg)', color: 'var(--fg-muted)' }
+    };
+
+    // === State ===
+    const STORAGE_KEY = 'phd_data_links';
+    let links = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let activeFilter = 'All';
+    let pendingDeleteId = null;
+
+    // === DOM refs ===
+    const addForm = document.getElementById('addForm');
+    const inputTitle = document.getElementById('inputTitle');
+    const inputUrl = document.getElementById('inputUrl');
+    const inputDesc = document.getElementById('inputDesc');
+    const inputCat = document.getElementById('inputCat');
+    const linksList = document.getElementById('linksList');
+    const emptyState = document.getElementById('emptyState');
+    const linkCount = document.getElementById('linkCount');
+    const filterBar = document.getElementById('filterBar');
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteModalText = document.getElementById('deleteModalText');
+    const deleteCancel = document.getElementById('deleteCancel');
+    const deleteConfirm = document.getElementById('deleteConfirm');
+    const toastEl = document.getElementById('toast');
+
+    // === Helpers ===
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function stripProtocol(url) {
+      return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+    }
+
+    // === Render ===
+    function render() {
+      // Update count
+      linkCount.textContent = `${links.length} link${links.length !== 1 ? 's' : ''} saved`;
+
+      // Clear existing link cards
+      linksList.querySelectorAll('.link-card-wrap').forEach(el => el.remove());
+
+      // Filter
+      const filtered = activeFilter === 'All' ? links : links.filter(l => l.category === activeFilter);
+
+      if (filtered.length === 0) {
+        emptyState.style.display = 'block';
+        if (links.length > 0 && activeFilter !== 'All') {
+          emptyState.querySelector('p').textContent = `No ${activeFilter.toLowerCase()} links`;
+          emptyState.querySelector('p:last-child').textContent = 'Try a different category filter.';
+        } else {
+          emptyState.querySelector('p').textContent = 'No links added yet';
+          emptyState.querySelector('p:last-child').textContent = 'Add datasets, scripts, notebooks, or any analysis resources above.';
+        }
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      filtered.forEach(link => {
+        const meta = catMeta[link.category] || catMeta.Other;
+        const wrap = document.createElement('div');
+        wrap.className = 'link-card-wrap';
+        wrap.style.marginBottom = '12px';
+        wrap.style.animation = 'slideIn 0.3s ease forwards';
+
+        wrap.innerHTML = `
+          <div class="card" style="overflow: hidden;">
+            <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-item">
+              <div class="link-icon" style="background: ${meta.bg}; color: ${meta.color};">
+                <i class="${meta.icon}"></i>
+              </div>
+              <div class="link-text">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="font-weight: 600; font-size: 15px;">${escapeHtml(link.title)}</span>
+                  <span class="cat-badge">${escapeHtml(link.category)}</span>
+                </div>
+                ${link.description ? `<div style="font-size: 13px; color: var(--fg-muted); font-weight: 300; margin-top: 2px;">${escapeHtml(link.description)}</div>` : ''}
+                <div class="link-url-preview">${escapeHtml(stripProtocol(link.url))}</div>
+              </div>
+              <span class="link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+              <button class="link-delete" data-id="${link.id}" aria-label="Delete link" title="Remove link">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </a>
+          </div>
+        `;
+
+        // Prevent delete click from triggering the link
+        const deleteBtn = wrap.querySelector('.link-delete');
+        deleteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pendingDeleteId = link.id;
+          deleteModalText.textContent = `Remove "${link.title}"? This cannot be undone.`;
+          deleteModal.classList.add('open');
+        });
+
+        linksList.appendChild(wrap);
+      });
+    }
+
+    // === Add link ===
+    addForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = inputTitle.value.trim();
+      let url = inputUrl.value.trim();
+      const desc = inputDesc.value.trim();
+      const cat = inputCat.value;
+
+      if (!title || !url) return;
+
+      // Auto-add protocol if missing
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      links.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        title,
+        url,
+        description: desc,
+        category: cat,
+        added: new Date().toISOString()
+      });
+
+      save();
+      render();
+      showToast(`Added "${title}"`);
+
+      inputTitle.value = '';
+      inputUrl.value = '';
+      inputDesc.value = '';
+      inputCat.value = 'Dataset';
+      inputTitle.focus();
+    });
+
+    // === Delete modal ===
+    deleteCancel.addEventListener('click', () => {
+      deleteModal.classList.remove('open');
+      pendingDeleteId = null;
+    });
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        deleteModal.classList.remove('open');
+        pendingDeleteId = null;
+      }
+    });
+    deleteConfirm.addEventListener('click', () => {
+      if (pendingDeleteId) {
+        const link = links.find(l => l.id === pendingDeleteId);
+        links = links.filter(l => l.id !== pendingDeleteId);
+        save();
+        render();
+        if (link) showToast(`Removed "${link.title}"`);
+      }
+      deleteModal.classList.remove('open');
+      pendingDeleteId = null;
+    });
+
+    // === Filter pills ===
+    filterBar.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterBar.querySelector('.active').classList.remove('active');
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        render();
+      });
+    });
+
+    // === Keyboard: Escape closes modal ===
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && deleteModal.classList.contains('open')) {
+        deleteModal.classList.remove('open');
+        pendingDeleteId = null;
+      }
+    });
+
+    // === Init ===
+    render();
+  </script>
+</body>
+</html>
