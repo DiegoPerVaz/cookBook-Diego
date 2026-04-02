@@ -3,279 +3,712 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PhD Lab Notebook – Diego</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>PhD Workspace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #F5F0E8;
+      --bg-deep: #EDE7DB;
+      --fg: #2C2416;
+      --fg-muted: #8A7E6B;
+      --accent: #C0582A;
+      --accent-hover: #A84A22;
+      --card: #FDFAF5;
+      --card-border: #E0D8CA;
+      --shadow: rgba(44, 36, 22, 0.06);
+      --shadow-lg: rgba(44, 36, 22, 0.1);
+      --tag-bg: #EDE4D4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1A1714;
+      --bg-deep: #141210;
+      --fg: #E8E0D4;
+      --fg-muted: #8A7E6B;
+      --accent: #D4713E;
+      --accent-hover: #E8854F;
+      --card: #23201B;
+      --card-border: #3A352D;
+      --shadow: rgba(0,0,0,0.2);
+      --shadow-lg: rgba(0,0,0,0.35);
+      --tag-bg: #2E2A23;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      transition: background-color 0.4s ease, color 0.4s ease;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 { font-family: 'Source Serif 4', serif; }
+
+    /* Subtle grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* Ambient background blobs */
+    .ambient-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.12;
+      transition: opacity 0.4s ease;
+    }
+    [data-theme="dark"] .ambient-blob { opacity: 0.06; }
+
+    .blob-1 {
+      width: 500px; height: 500px;
+      background: var(--accent);
+      top: -150px; right: -100px;
+      animation: blobFloat1 20s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: #8B7355;
+      bottom: -100px; left: -100px;
+      animation: blobFloat2 25s ease-in-out infinite;
+    }
+
+    @keyframes blobFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-40px, 30px) scale(1.05); }
+      66% { transform: translate(20px, -20px) scale(0.95); }
+    }
+    @keyframes blobFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -40px) scale(1.08); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 20px var(--shadow-lg);
+    }
+
+    /* Textarea styling */
+    .notes-area {
+      width: 100%;
+      min-height: 200px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: vertical;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--fg);
+      caret-color: var(--accent);
+    }
+    .notes-area::placeholder {
+      color: var(--fg-muted);
+      opacity: 0.6;
+    }
+
+    /* Event input */
+    .event-input {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.4s ease;
+    }
+    .event-input:focus {
+      border-color: var(--accent);
+    }
+    .event-input::placeholder { color: var(--fg-muted); opacity: 0.5; }
+
+    /* Buttons */
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-accent:hover { background: var(--accent-hover); }
+    .btn-accent:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--fg-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Event items */
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--card-border);
+      animation: slideIn 0.3s ease;
+      transition: border-color 0.4s ease;
+    }
+    .event-item:last-child { border-bottom: none; }
+
+    .event-date-badge {
+      flex-shrink: 0;
+      background: var(--tag-bg);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg-muted);
+      text-align: center;
+      line-height: 1.3;
+      min-width: 48px;
+      transition: background 0.4s ease;
+    }
+    .event-date-badge.past { opacity: 0.45; }
+    .event-date-badge.today {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .event-delete {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--fg-muted);
+      opacity: 0;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 13px;
+      transition: opacity 0.2s ease, color 0.2s ease;
+    }
+    .event-item:hover .event-delete { opacity: 1; }
+    .event-delete:hover { color: var(--accent); }
+
+    /* Nav links */
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      text-decoration: none;
+      color: var(--fg);
+      border-radius: 12px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      border-radius: 12px;
+    }
+    .nav-link:hover::after { opacity: 0.04; }
+    .nav-link:hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--shadow-lg); }
+
+    .nav-icon {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: background 0.4s ease;
+    }
+    .nav-link-text { position: relative; z-index: 1; }
+    .nav-link-arrow {
+      margin-left: auto;
+      color: var(--fg-muted);
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .nav-link:hover .nav-link-arrow { transform: translateX(4px); color: var(--accent); }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.25s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Save indicator */
+    .save-indicator {
+      font-size: 12px;
+      color: var(--fg-muted);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .save-indicator.visible { opacity: 1; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--fg);
+      color: var(--bg);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 8px 30px var(--shadow-lg);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up {
+      animation: fadeUp 0.5s ease forwards;
+      opacity: 0;
+    }
+    .fade-up-d1 { animation-delay: 0.05s; }
+    .fade-up-d2 { animation-delay: 0.12s; }
+    .fade-up-d3 { animation-delay: 0.2s; }
+    .fade-up-d4 { animation-delay: 0.28s; }
+    .fade-up-d5 { animation-delay: 0.36s; }
+
+    /* Events scrollable area */
+    .events-list {
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-grid { grid-template-columns: 1fr !important; }
+      .nav-grid { grid-template-columns: 1fr !important; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Character count */
+    .char-count {
+      font-size: 11px;
+      color: var(--fg-muted);
+      opacity: 0.5;
+      text-align: right;
+      margin-top: 4px;
+    }
+  </style>
 </head>
 <body>
+  <!-- Ambient background -->
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
 
-<nav>
-  <a class="nav-brand" href="#protocols">Lab <span>Notebook</span></a>
-  <div class="nav-tabs">
-
-    <a class="nav-tab" id="nav-protocols" href="#protocols">
-      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path d="M9 5H7a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h0a2 2 0 002-2M9 5a2 2 0 012-2h0a2 2 0 012 2"/>
-        <path d="M9 12l1.5 1.5L13 10" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Protocols</span>
-    </a>
-
-    <a class="nav-tab" id="nav-literature" href="#literature">
-      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Literature</span>
-    </a>
-
-    <a class="nav-tab" id="nav-data" href="#data">
-      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-        <ellipse cx="10" cy="5" rx="7" ry="2.5"/>
-        <path d="M3 5v4c0 1.38 3.13 2.5 7 2.5S17 10.38 17 9V5"/>
-        <path d="M3 9v4c0 1.38 3.13 2.5 7 2.5S17 14.38 17 13V9"/>
-        <path d="M3 13v4c0 1.38 3.13 2.5 7 2.5S17 18.38 17 17v-4" stroke-linecap="round"/>
-      </svg>
-      <span>Data</span>
-    </a>
-
-    <a class="nav-tab" id="nav-calendar" href="#calendar">
-      <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-        <rect x="3" y="4" width="14" height="14" rx="2"/>
-        <path d="M7 2v2M13 2v2M3 8h14" stroke-linecap="round"/>
-        <path d="M7 12h2M11 12h2M7 15h2" stroke-linecap="round"/>
-      </svg>
-      <span>Calendar</span>
-    </a>
-
-  </div>
-</nav>
-
-<!-- ══════════════════════════════ PROTOCOLS ══════════════════════════════ -->
-<div class="page" id="page-protocols">
-  <div class="page-header">
-    <h1>Protocols</h1>
-    <p>Step-by-step lab protocols for scRNA-seq, CITE-seq, and bioinformatics workflows.</p>
-  </div>
-
-  <div class="search-wrap">
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <circle cx="9" cy="9" r="6"/><path d="M15 15l3 3" stroke-linecap="round"/>
-    </svg>
-    <input type="text" id="proto-search" placeholder="Search protocols…">
-  </div>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
-    <div class="filter-bar" style="margin-bottom:0">
-      <button class="filter-btn proto-filter-btn active" id="proto-filter-all">All</button>
-      <button class="filter-btn proto-filter-btn" id="proto-filter-scrna">scRNA-seq</button>
-      <button class="filter-btn proto-filter-btn" id="proto-filter-cite">CITE-seq</button>
-      <button class="filter-btn proto-filter-btn" id="proto-filter-bio">Bioinformatics</button>
+  <!-- Header -->
+  <header style="position: relative; z-index: 1; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; max-width: 1120px; margin: 0 auto;">
+    <div class="fade-up" style="display: flex; align-items: baseline; gap: 12px;">
+      <h1 style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px;">Workspace</h1>
+      <span style="font-size: 12px; color: var(--fg-muted); font-weight: 300; letter-spacing: 1px; text-transform: uppercase;">PhD</span>
     </div>
-    <button class="btn btn-primary" id="btn-add-protocol">+ Add Protocol</button>
-  </div>
+    <div class="fade-up fade-up-d1" style="display: flex; align-items: center; gap: 12px;">
+      <span id="currentDate" style="font-size: 13px; color: var(--fg-muted); font-weight: 300;"></span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
 
-  <div class="add-form" id="form-add-protocol">
-    <h3>Add New Protocol</h3>
-    <div class="form-row"><label>Title *</label><input id="pf-title" type="text" placeholder="e.g. FACS sorting for T cells"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-      <div class="form-row"><label>Category</label>
-        <select id="pf-category">
-          <option>scRNA-seq</option><option>CITE-seq</option><option>Bioinformatics</option><option>Other</option>
-        </select>
+  <!-- Main content -->
+  <main style="position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 32px 80px;">
+
+    <!-- Main grid: Notes + Events -->
+    <div class="main-grid" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 32px;">
+
+      <!-- Notes card -->
+      <section class="card fade-up fade-up-d2" style="padding: 0; display: flex; flex-direction: column;">
+        <div style="padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent);"></div>
+            <h2 style="font-size: 16px; font-weight: 700;">Reminders & Notes</h2>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="save-indicator" id="saveIndicator">
+              <i class="fa-solid fa-check" style="font-size: 10px;"></i> Saved
+            </span>
+            <button class="btn-ghost" id="clearNotes" style="font-size: 12px; padding: 6px 10px;">
+              <i class="fa-solid fa-eraser" style="margin-right: 4px;"></i> Clear
+            </button>
+          </div>
+        </div>
+        <div style="padding: 16px 24px 20px; flex: 1;">
+          <textarea
+            class="notes-area"
+            id="notesArea"
+            placeholder="Write your reminders here...&#10;&#10;e.g. Run SDS-PAGE for samples 3-7&#10;     Email supervisor about conference deadline&#10;     Check buffer pH before starting extraction"
+            spellcheck="false"
+            aria-label="Reminders and notes"
+          ></textarea>
+          <div class="char-count" id="charCount">0 characters</div>
+        </div>
+      </section>
+
+      <!-- Calendar events card -->
+      <section class="card fade-up fade-up-d3" style="padding: 0; display: flex; flex-direction: column;">
+        <div style="padding: 20px 24px 0; display: flex; align-items: center; gap: 10px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #8B7355;"></div>
+          <h2 style="font-size: 16px; font-weight: 700;">Calendar</h2>
+        </div>
+
+        <!-- Add event form -->
+        <form id="eventForm" style="padding: 16px 24px 12px; display: flex; gap: 8px;" autocomplete="off">
+          <input
+            type="text"
+            class="event-input"
+            id="eventText"
+            placeholder="Event description"
+            style="flex: 1; min-width: 0;"
+            required
+            aria-label="Event description"
+          >
+          <input
+            type="date"
+            class="event-input"
+            id="eventDate"
+            style="flex-shrink: 0; width: 140px;"
+            required
+            aria-label="Event date"
+          >
+          <button type="submit" class="btn-accent" style="flex-shrink: 0; padding: 10px 14px;" aria-label="Add event">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </form>
+
+        <!-- Events list -->
+        <div class="events-list" id="eventsList" style="padding: 0 24px 20px;">
+          <div id="emptyState" style="text-align: center; padding: 32px 0; color: var(--fg-muted); opacity: 0.5; font-size: 14px;">
+            <i class="fa-regular fa-calendar" style="font-size: 28px; display: block; margin-bottom: 8px;"></i>
+            No events yet
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Navigation links section -->
+    <section class="fade-up fade-up-d4">
+      <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--fg-muted);"></div>
+        <h2 style="font-size: 16px; font-weight: 700;">Resources</h2>
       </div>
-      <div class="form-row"><label>Estimated time</label><input id="pf-time" type="text" placeholder="e.g. ~4 h"></div>
-    </div>
-    <div class="form-row"><label>Reagents / software needed</label><input id="pf-reagents" type="text" placeholder="comma-separated"></div>
-    <div class="form-row"><label>Notes / tips</label><textarea id="pf-notes" placeholder="Critical tips, common pitfalls…"></textarea></div>
-    <div class="form-actions">
-      <button class="btn" id="proto-form-cancel">Cancel</button>
-      <button class="btn btn-primary" id="proto-form-save">Save</button>
-    </div>
-  </div>
+      <div class="nav-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
 
-  <div id="protocols-list"></div>
-</div>
+        <a href="#" class="nav-link card" onclick="showToast('Link to Protocols page — set your URL in the code'); return false;">
+          <div class="nav-icon" style="background: #E8DDD0; color: #7A6650;">
+            [data-theme="dark"] & .nav-icon { background: var(--tag-bg); }
+            <i class="fa-solid fa-flask"></i>
+          </div>
+          <div class="nav-link-text">
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">Lab Protocols</div>
+            <div style="font-size: 13px; color: var(--fg-muted); font-weight: 300;">Standard operating procedures and methods</div>
+          </div>
+          <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </a>
 
-<!-- ══════════════════════════════ LITERATURE ══════════════════════════════ -->
-<div class="page" id="page-literature">
-  <div class="page-header">
-    <h1>Literature</h1>
-    <p>Key papers in single-cell biology, immunology, and computational methods.</p>
-  </div>
+        <a href="#" class="nav-link card" onclick="showToast('Link to Publications page — set your URL in the code'); return false;">
+          <div class="nav-icon" style="background: #D8E4DC; color: #4A6B58;">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+          <div class="nav-link-text">
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">Publications</div>
+            <div style="font-size: 13px; color: var(--fg-muted); font-weight: 300;">Key papers, references, and reading list</div>
+          </div>
+          <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </a>
 
-  <div class="search-wrap">
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-      <circle cx="9" cy="9" r="6"/><path d="M15 15l3 3" stroke-linecap="round"/>
-    </svg>
-    <input type="text" id="lit-search" placeholder="Search by title, author, or tag…">
-  </div>
+        <a href="#" class="nav-link card" onclick="showToast('Link to Data page — set your URL in the code'); return false;">
+          <div class="nav-icon" style="background: #DDD6E8; color: #6B5878;">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="nav-link-text">
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">Data & Analysis</div>
+            <div style="font-size: 13px; color: var(--fg-muted); font-weight: 300;">Datasets, scripts, and analysis notebooks</div>
+          </div>
+          <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </a>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
-    <div class="filter-bar" style="margin-bottom:0">
-      <button class="filter-btn lit-filter-btn active" id="lit-filter-all">All</button>
-      <button class="filter-btn lit-filter-btn" id="lit-filter-methods">Methods</button>
-      <button class="filter-btn lit-filter-btn" id="lit-filter-immunology">Immunology</button>
-      <button class="filter-btn lit-filter-btn" id="lit-filter-review">Review</button>
-    </div>
-    <button class="btn btn-primary" id="btn-add-paper">+ Add Paper</button>
-  </div>
+        <a href="#" class="nav-link card" onclick="showToast('Link to Writing page — set your URL in the code'); return false;">
+          <div class="nav-icon" style="background: #E4D8D0; color: #8B6050;">
+            <i class="fa-solid fa-pen-nib"></i>
+          </div>
+          <div class="nav-link-text">
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 2px;">Writing</div>
+            <div style="font-size: 13px; color: var(--fg-muted); font-weight: 300;">Drafts, thesis chapters, and manuscripts</div>
+          </div>
+          <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+        </a>
 
-  <div class="add-form" id="form-add-paper">
-    <h3>Add Paper</h3>
-    <div class="form-row"><label>Title *</label><input id="lf-title" type="text" placeholder="Full paper title"></div>
-    <div class="form-row"><label>Authors</label><input id="lf-authors" type="text" placeholder="e.g. Smith J, Doe A, et al."></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-      <div class="form-row"><label>Journal &amp; year</label><input id="lf-journal" type="text" placeholder="e.g. Nature, 2023 · DOI: ..."></div>
-      <div class="form-row"><label>Category</label>
-        <select id="lf-category"><option>Methods</option><option>Immunology</option><option>Review</option><option>Other</option></select>
       </div>
-    </div>
-    <div class="form-row"><label>Abstract / summary</label><textarea id="lf-abstract" placeholder="Brief description of what makes this paper relevant…"></textarea></div>
-    <div class="form-row"><label>DOI / URL</label><input id="lf-url" type="text" placeholder="https://doi.org/..."></div>
-    <div class="form-row"><label>Tags (comma-separated)</label><input id="lf-tags" type="text" placeholder="e.g. PBMC, T cells, Seurat"></div>
-    <div class="form-actions">
-      <button class="btn" id="paper-form-cancel">Cancel</button>
-      <button class="btn btn-primary" id="paper-form-save">Save</button>
-    </div>
-  </div>
+    </section>
 
-  <div id="papers-list"></div>
-</div>
+    <!-- Footer -->
+    <footer class="fade-up fade-up-d5" style="margin-top: 48px; text-align: center; color: var(--fg-muted); font-size: 12px; opacity: 0.5; font-weight: 300;">
+      All data stored locally in your browser. Nothing leaves this machine.
+    </footer>
 
-<!-- ══════════════════════════════ DATA ══════════════════════════════ -->
-<div class="page" id="page-data">
-  <div class="page-header">
-    <h1>Data</h1>
-    <p>Track important datasets, public resources, and local data paths.</p>
-  </div>
+  </main>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem">
-    <div class="data-stat">
-      <div class="num" id="stat-datasets">0</div>
-      <div class="label">Datasets tracked</div>
-    </div>
-    <div class="data-stat">
-      <div class="num" id="stat-types">0</div>
-      <div class="label">Modality types</div>
-    </div>
-    <div class="data-stat">
-      <div class="num">GEO</div>
-      <div class="label">Primary source</div>
-    </div>
-    <div class="data-stat">
-      <div class="num">10x</div>
-      <div class="label">Platform</div>
-    </div>
-  </div>
+  <!-- Toast element -->
+  <div class="toast" id="toast"></div>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
-    <h2 class="section-title" style="margin:0;flex:1">Datasets</h2>
-    <button class="btn btn-primary" id="btn-add-dataset">+ Add Dataset</button>
-  </div>
+  <script>
+    // === State ===
+    const STORAGE_KEYS = {
+      notes: 'phd_notes',
+      events: 'phd_events',
+      theme: 'phd_theme'
+    };
 
-  <div class="add-form" id="form-add-dataset">
-    <h3>Add Dataset</h3>
-    <div class="form-row"><label>Name *</label><input id="df-name" type="text" placeholder="e.g. PBMCs 10k (10x)"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-      <div class="form-row"><label>Modality</label>
-        <select id="df-type"><option>scRNA-seq</option><option>CITE-seq</option><option>Bulk RNA-seq</option><option>ATAC-seq</option><option>Other</option></select>
-      </div>
-      <div class="form-row"><label>Number of cells</label><input id="df-cells" type="text" placeholder="e.g. 10,000"></div>
-    </div>
-    <div class="form-row"><label>Description</label><textarea id="df-desc" placeholder="What is this dataset? Why is it relevant?"></textarea></div>
-    <div class="form-row"><label>Local path</label><input id="df-path" type="text" placeholder="e.g. /mnt/data/project/"></div>
-    <div class="form-row"><label>Source URL</label><input id="df-url" type="text" placeholder="https://www.ncbi.nlm.nih.gov/geo/..."></div>
-    <div class="form-row"><label>Tags (comma-separated)</label><input id="df-tags" type="text" placeholder="e.g. PBMC, benchmark, healthy"></div>
-    <div class="form-actions">
-      <button class="btn" id="dataset-form-cancel">Cancel</button>
-      <button class="btn btn-primary" id="dataset-form-save">Save</button>
-    </div>
-  </div>
+    // === Theme toggle ===
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
 
-  <div class="grid-2" id="datasets-list" style="margin-top:1rem"></div>
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem(STORAGE_KEYS.theme, theme);
+      const icon = themeToggle.querySelector('i');
+      icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
 
-  <h2 class="section-title" style="margin-top:2.5rem">Useful Resources</h2>
-  <div class="grid-3">
-    <a href="https://www.ncbi.nlm.nih.gov/geo/" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>NCBI GEO</h3>
-      <p>Gene Expression Omnibus — public repository for sequencing and microarray data.</p>
-      <span class="badge badge-green" style="margin-top:8px">Database</span>
-    </a>
-    <a href="https://www.10xgenomics.com/datasets" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>10x Genomics Datasets</h3>
-      <p>Official benchmark and example datasets from 10x Genomics for Chromium, Visium, and more.</p>
-      <span class="badge badge-blue" style="margin-top:8px">Platform</span>
-    </a>
-    <a href="https://cellxgene.cziscience.com/" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>CZ CELLxGENE</h3>
-      <p>Chan Zuckerberg CELLxGENE data portal with millions of cells across tissues and species.</p>
-      <span class="badge badge-purple" style="margin-top:8px">Atlas</span>
-    </a>
-    <a href="https://www.ebi.ac.uk/gxa/sc/home" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>Single Cell Expression Atlas</h3>
-      <p>EBI's curated single-cell gene expression data across multiple species and conditions.</p>
-      <span class="badge badge-orange" style="margin-top:8px">Atlas</span>
-    </a>
-    <a href="https://human.brain-map.org/" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>Human Cell Atlas</h3>
-      <p>International initiative mapping every cell type in the human body.</p>
-      <span class="badge badge-green" style="margin-top:8px">Atlas</span>
-    </a>
-    <a href="https://panglaodb.se/" target="_blank" class="card" style="text-decoration:none;color:inherit">
-      <h3>PanglaoDB</h3>
-      <p>Database of cell type marker genes useful for scRNA-seq cluster annotation.</p>
-      <span class="badge badge-blue" style="margin-top:8px">Markers</span>
-    </a>
-  </div>
-</div>
+    // Load saved theme
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
 
-<!-- ══════════════════════════════ CALENDAR ══════════════════════════════ -->
-<div class="page" id="page-calendar">
-  <div class="page-header">
-    <h1>Calendar</h1>
-    <p>Upcoming events, seminars, lab meetings, and deadlines at your institute.</p>
-  </div>
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
-    <div style="display:flex;align-items:center;gap:12px">
-      <button class="btn" id="cal-prev">←</button>
-      <strong id="cal-month-label" style="font-size:15px;min-width:160px;text-align:center"></strong>
-      <button class="btn" id="cal-next">→</button>
-    </div>
-    <button class="btn btn-primary" id="btn-add-event">+ Add Event</button>
-  </div>
+    // === Date display ===
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    dateEl.textContent = now.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    });
 
-  <div class="card" style="margin-bottom:1.5rem;padding:1rem">
-    <div class="calendar-grid" id="cal-grid"></div>
-  </div>
+    // === Notes ===
+    const notesArea = document.getElementById('notesArea');
+    const charCount = document.getElementById('charCount');
+    const saveIndicator = document.getElementById('saveIndicator');
+    const clearNotesBtn = document.getElementById('clearNotes');
+    let saveTimeout;
 
-  <div class="add-form" id="form-add-event">
-    <h3>Add Event</h3>
-    <div class="form-row"><label>Title *</label><input id="ef-title" type="text" placeholder="e.g. Lab Meeting"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem">
-      <div class="form-row"><label>Date *</label><input id="ef-date" type="date"></div>
-      <div class="form-row"><label>Time</label><input id="ef-time" type="time" value="10:00"></div>
-      <div class="form-row"><label>Type</label>
-        <select id="ef-type"><option value="meeting">Lab meeting</option><option value="seminar">Seminar</option><option value="deadline">Deadline</option><option value="social">Social / retreat</option></select>
-      </div>
-    </div>
-    <div class="form-row"><label>Location</label><input id="ef-location" type="text" placeholder="Room / building"></div>
-    <div class="form-row"><label>Notes</label><textarea id="ef-notes" placeholder="What to bring, links…"></textarea></div>
-    <div class="form-actions">
-      <button class="btn" id="event-form-cancel">Cancel</button>
-      <button class="btn btn-primary" id="event-form-save">Save Event</button>
-    </div>
-  </div>
+    // Load saved notes
+    notesArea.value = localStorage.getItem(STORAGE_KEYS.notes) || '';
+    charCount.textContent = `${notesArea.value.length} characters`;
 
-  <h2 class="section-title">Upcoming Events</h2>
-  <div style="display:flex;gap:12px;margin-bottom:1rem;flex-wrap:wrap;font-size:13px;color:var(--text-2)">
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent);display:inline-block"></span>Lab meeting</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--purple);display:inline-block"></span>Seminar</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#c0392b;display:inline-block"></span>Deadline</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent-2);display:inline-block"></span>Social</span>
-  </div>
-  <div id="events-list"></div>
-</div>
+    notesArea.addEventListener('input', () => {
+      charCount.textContent = `${notesArea.value.length} characters`;
+      // Debounced save
+      clearTimeout(saveTimeout);
+      saveTimeout.push || (saveTimeout = null);
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        localStorage.setItem(STORAGE_KEYS.notes, notesArea.value);
+        // Flash save indicator
+        saveIndicator.classList.add('visible');
+        setTimeout(() => saveIndicator.classList.remove('visible'), 1500);
+      }, 600);
+    });
 
-<script src="js/app.js"></script>
+    clearNotesBtn.addEventListener('click', () => {
+      if (notesArea.value.trim() === '') return;
+      notesArea.value = '';
+      charCount.textContent = '0 characters';
+      localStorage.setItem(STORAGE_KEYS.notes, '');
+      saveIndicator.classList.add('visible');
+      setTimeout(() => saveIndicator.classList.remove('visible'), 1500);
+      showToast('Notes cleared');
+    });
+
+    // === Calendar Events ===
+    const eventForm = document.getElementById('eventForm');
+    const eventText = document.getElementById('eventText');
+    const eventDate = document.getElementById('eventDate');
+    const eventsList = document.getElementById('eventsList');
+    const emptyState = document.getElementById('emptyState');
+
+    // Set default date to today
+    eventDate.value = now.toISOString().split('T')[0];
+
+    let events = JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || '[]');
+
+    function formatBadgeDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `<div style="font-weight:600;">${d.getDate()}</div><div>${months[d.getMonth()]}</div>`;
+    }
+
+    function getDateClass(dateStr) {
+      const today = now.toISOString().split('T')[0];
+      if (dateStr === today) return 'today';
+      if (dateStr < today) return 'past';
+      return '';
+    }
+
+    function renderEvents() {
+      // Sort by date ascending
+      events.sort((a, b) => a.date.localeCompare(b.date));
+
+      // Remove all event items (keep empty state)
+      eventsList.querySelectorAll('.event-item').forEach(el => el.remove());
+
+      if (events.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      events.forEach((ev, idx) => {
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        item.innerHTML = `
+          <div class="event-date-badge ${getDateClass(ev.date)}">${formatBadgeDate(ev.date)}</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 14px; line-height: 1.4; word-break: break-word;">${escapeHtml(ev.text)}</div>
+          </div>
+          <button class="event-delete" data-idx="${idx}" aria-label="Delete event">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        eventsList.appendChild(item);
+      });
+
+      // Bind delete buttons
+      eventsList.querySelectorAll('.event-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-idx'));
+          events.splice(idx, 1);
+          localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+          renderEvents();
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    eventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = eventText.value.trim();
+      const date = eventDate.value;
+      if (!text || !date) return;
+
+      events.push({ text, date, id: Date.now() });
+      localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+      renderEvents();
+
+      eventText.value = '';
+      eventDate.value = now.toISOString().split('T')[0];
+      eventText.focus();
+    });
+
+    renderEvents();
+
+    // === Toast ===
+    const toastEl = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+    }
+
+    // === Keyboard shortcut: Ctrl+Shift+N to focus notes ===
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'N') {
+        e.preventDefault();
+        notesArea.focus();
+      }
+      // Ctrl+Shift+E to focus event input
+      if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+        e.preventDefault();
+        eventText.focus();
+      }
+    });
+  </script>
 </body>
 </html>
