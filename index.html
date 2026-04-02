@@ -21,6 +21,10 @@
       --shadow: rgba(44, 36, 22, 0.06);
       --shadow-lg: rgba(44, 36, 22, 0.1);
       --tag-bg: #EDE4D4;
+      --success: #4A7A58;
+      --success-bg: #D8E8DC;
+      --warn: #8A7240;
+      --warn-bg: #E8E0CC;
     }
 
     [data-theme="dark"] {
@@ -35,6 +39,10 @@
       --shadow: rgba(0,0,0,0.2);
       --shadow-lg: rgba(0,0,0,0.35);
       --tag-bg: #2E2A23;
+      --success: #5EA872;
+      --success-bg: #1E2E22;
+      --warn: #BFA050;
+      --warn-bg: #2E2A1E;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,7 +57,6 @@
 
     h1, h2, h3 { font-family: 'Source Serif 4', serif; }
 
-    /* Subtle grain texture overlay */
     body::before {
       content: '';
       position: fixed;
@@ -61,7 +68,6 @@
       background-size: 200px;
     }
 
-    /* Ambient background blobs */
     .ambient-blob {
       position: fixed;
       border-radius: 50%;
@@ -103,11 +109,8 @@
       box-shadow: 0 2px 8px var(--shadow);
       transition: box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease;
     }
-    .card:hover {
-      box-shadow: 0 4px 20px var(--shadow-lg);
-    }
+    .card:hover { box-shadow: 0 4px 20px var(--shadow-lg); }
 
-    /* Textarea styling */
     .notes-area {
       width: 100%;
       min-height: 200px;
@@ -121,12 +124,8 @@
       color: var(--fg);
       caret-color: var(--accent);
     }
-    .notes-area::placeholder {
-      color: var(--fg-muted);
-      opacity: 0.6;
-    }
+    .notes-area::placeholder { color: var(--fg-muted); opacity: 0.6; }
 
-    /* Event input */
     .event-input {
       background: var(--bg);
       border: 1px solid var(--card-border);
@@ -138,12 +137,9 @@
       outline: none;
       transition: border-color 0.2s ease, background 0.4s ease;
     }
-    .event-input:focus {
-      border-color: var(--accent);
-    }
+    .event-input:focus { border-color: var(--accent); }
     .event-input::placeholder { color: var(--fg-muted); opacity: 0.5; }
 
-    /* Buttons */
     .btn-accent {
       background: var(--accent);
       color: #fff;
@@ -170,10 +166,70 @@
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
-    .btn-ghost:hover {
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      width: 36px; height: 36px;
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Filename input */
+    .filename-input {
+      background: var(--tag-bg);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      width: 130px;
+      transition: all 0.2s ease;
+    }
+    .filename-input:focus {
       border-color: var(--accent);
-      color: var(--accent);
+      background: var(--bg);
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .status-connected {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+    .status-disconnected {
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+    .status-saved {
+      background: var(--success-bg);
+      color: var(--success);
     }
 
     /* Event items */
@@ -202,10 +258,7 @@
       transition: background 0.4s ease;
     }
     .event-date-badge.past { opacity: 0.45; }
-    .event-date-badge.today {
-      background: var(--accent);
-      color: #fff;
-    }
+    .event-date-badge.today { background: var(--accent); color: #fff; }
 
     .event-delete {
       flex-shrink: 0;
@@ -266,7 +319,6 @@
     }
     .nav-link:hover .nav-link-arrow { transform: translateX(4px); color: var(--accent); }
 
-    /* Theme toggle */
     .theme-toggle {
       width: 40px; height: 40px;
       border-radius: 10px;
@@ -278,22 +330,31 @@
       font-size: 16px;
       transition: all 0.25s ease;
     }
-    .theme-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--fg-muted);
+      opacity: 0.5;
+      text-align: right;
+      margin-top: 4px;
     }
 
-    /* Save indicator */
-    .save-indicator {
+    /* No-FSAPI notice */
+    .fs-notice {
       font-size: 12px;
-      color: var(--fg-muted);
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      color: var(--warn);
+      background: var(--warn-bg);
+      border-radius: 8px;
+      padding: 10px 14px;
       display: flex;
-      align-items: center;
-      gap: 4px;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+      margin-top: 10px;
+      transition: background 0.4s ease;
     }
-    .save-indicator.visible { opacity: 1; }
+    .fs-notice i { margin-top: 2px; flex-shrink: 0; }
 
     /* Toast */
     .toast {
@@ -310,16 +371,15 @@
       opacity: 0;
       transition: all 0.3s ease;
       z-index: 10000;
+      max-width: 360px;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
 
-    /* Animations */
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -328,49 +388,39 @@
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .fade-up {
-      animation: fadeUp 0.5s ease forwards;
-      opacity: 0;
-    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; opacity: 0; }
     .fade-up-d1 { animation-delay: 0.05s; }
     .fade-up-d2 { animation-delay: 0.12s; }
     .fade-up-d3 { animation-delay: 0.2s; }
     .fade-up-d4 { animation-delay: 0.28s; }
     .fade-up-d5 { animation-delay: 0.36s; }
 
-    /* Events scrollable area */
-    .events-list {
-      max-height: 320px;
-      overflow-y: auto;
-      padding-right: 4px;
+    .events-list { max-height: 320px; overflow-y: auto; padding-right: 4px; }
+
+    /* Toolbar row */
+    .notes-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .main-grid { grid-template-columns: 1fr !important; }
       .nav-grid { grid-template-columns: 1fr !important; }
+      .notes-toolbar { gap: 4px; }
+      .filename-input { width: 100px; }
     }
 
-    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
       }
     }
-
-    /* Character count */
-    .char-count {
-      font-size: 11px;
-      color: var(--fg-muted);
-      opacity: 0.5;
-      text-align: right;
-      margin-top: 4px;
-    }
   </style>
 </head>
 <body>
-  <!-- Ambient background -->
   <div class="ambient-blob blob-1"></div>
   <div class="ambient-blob blob-2"></div>
 
@@ -388,29 +438,58 @@
     </div>
   </header>
 
-  <!-- Main content -->
+  <!-- Main -->
   <main style="position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 32px 80px;">
 
-    <!-- Main grid: Notes + Events -->
     <div class="main-grid" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 32px;">
 
       <!-- Notes card -->
       <section class="card fade-up fade-up-d2" style="padding: 0; display: flex; flex-direction: column;">
-        <div style="padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 10px;">
+        <!-- Title row -->
+        <div style="padding: 20px 24px 0;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
             <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent);"></div>
             <h2 style="font-size: 16px; font-weight: 700;">Reminders & Notes</h2>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="save-indicator" id="saveIndicator">
-              <i class="fa-solid fa-check" style="font-size: 10px;"></i> Saved
+          <!-- Toolbar -->
+          <div class="notes-toolbar">
+            <!-- Folder status -->
+            <span id="folderStatus" class="status-badge status-disconnected">
+              <i class="fa-solid fa-folder-closed" style="font-size: 11px;"></i>
+              <span id="folderStatusText">No folder</span>
             </span>
-            <button class="btn-ghost" id="clearNotes" style="font-size: 12px; padding: 6px 10px;">
-              <i class="fa-solid fa-eraser" style="margin-right: 4px;"></i> Clear
+            <!-- Filename -->
+            <input
+              type="text"
+              class="filename-input"
+              id="mdFilename"
+              value="reminders.md"
+              aria-label="Markdown filename"
+              title="Filename for the .md file"
+            >
+            <!-- Save to folder -->
+            <button class="btn-ghost" id="saveToFolderBtn" title="Save to notes/ folder">
+              <i class="fa-solid fa-floppy-disk"></i> Save
+            </button>
+            <!-- Download .md -->
+            <button class="btn-icon" id="downloadMdBtn" title="Download as .md file">
+              <i class="fa-solid fa-download"></i>
+            </button>
+            <!-- Spacer -->
+            <div style="flex: 1;"></div>
+            <!-- Clear -->
+            <button class="btn-icon" id="clearNotes" title="Clear notes">
+              <i class="fa-solid fa-eraser"></i>
             </button>
           </div>
+          <!-- Browser notice (hidden by default) -->
+          <div class="fs-notice" id="fsNotice" style="display: none;">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Your browser doesn't support direct folder saving. Use the download button instead, or open this page in Chrome or Edge for full folder support.</span>
+          </div>
         </div>
-        <div style="padding: 16px 24px 20px; flex: 1;">
+        <!-- Textarea -->
+        <div style="padding: 12px 24px 20px; flex: 1;">
           <textarea
             class="notes-area"
             id="notesArea"
@@ -428,32 +507,13 @@
           <div style="width: 8px; height: 8px; border-radius: 50%; background: #8B7355;"></div>
           <h2 style="font-size: 16px; font-weight: 700;">Calendar</h2>
         </div>
-
-        <!-- Add event form -->
         <form id="eventForm" style="padding: 16px 24px 12px; display: flex; gap: 8px;" autocomplete="off">
-          <input
-            type="text"
-            class="event-input"
-            id="eventText"
-            placeholder="Event description"
-            style="flex: 1; min-width: 0;"
-            required
-            aria-label="Event description"
-          >
-          <input
-            type="date"
-            class="event-input"
-            id="eventDate"
-            style="flex-shrink: 0; width: 140px;"
-            required
-            aria-label="Event date"
-          >
+          <input type="text" class="event-input" id="eventText" placeholder="Event description" style="flex: 1; min-width: 0;" required aria-label="Event description">
+          <input type="date" class="event-input" id="eventDate" style="flex-shrink: 0; width: 140px;" required aria-label="Event date">
           <button type="submit" class="btn-accent" style="flex-shrink: 0; padding: 10px 14px;" aria-label="Add event">
             <i class="fa-solid fa-plus"></i>
           </button>
         </form>
-
-        <!-- Events list -->
         <div class="events-list" id="eventsList" style="padding: 0 24px 20px;">
           <div id="emptyState" style="text-align: center; padding: 32px 0; color: var(--fg-muted); opacity: 0.5; font-size: 14px;">
             <i class="fa-regular fa-calendar" style="font-size: 28px; display: block; margin-bottom: 8px;"></i>
@@ -463,15 +523,14 @@
       </section>
     </div>
 
-    <!-- Navigation links section -->
+    <!-- Resources -->
     <section class="fade-up fade-up-d4">
       <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
         <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--fg-muted);"></div>
         <h2 style="font-size: 16px; font-weight: 700;">Resources</h2>
       </div>
       <div class="nav-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-
-        <a href="/datalinks.html" class="nav-link card" onclick="showToast('Link to Protocols page — set your URL in the code'); return false;">
+        <a href="protocols.html" class="nav-link card">
           <div class="nav-icon" style="background: #E8DDD0; color: #7A6650;">
             <i class="fa-solid fa-flask"></i>
           </div>
@@ -481,8 +540,7 @@
           </div>
           <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
         </a>
-
-        <a href="#" class="nav-link card" onclick="showToast('Link to Publications page — set your URL in the code'); return false;">
+        <a href="publications.html" class="nav-link card">
           <div class="nav-icon" style="background: #D8E4DC; color: #4A6B58;">
             <i class="fa-solid fa-book-open"></i>
           </div>
@@ -492,8 +550,7 @@
           </div>
           <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
         </a>
-
-        <a href="#" class="nav-link card" onclick="showToast('Link to Data page — set your URL in the code'); return false;">
+        <a href="data.html" class="nav-link card">
           <div class="nav-icon" style="background: #DDD6E8; color: #6B5878;">
             <i class="fa-solid fa-chart-line"></i>
           </div>
@@ -503,8 +560,7 @@
           </div>
           <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
         </a>
-
-        <a href="#" class="nav-link card" onclick="showToast('Link to Writing page — set your URL in the code'); return false;">
+        <a href="writing/index.html" class="nav-link card">
           <div class="nav-icon" style="background: #E4D8D0; color: #8B6050;">
             <i class="fa-solid fa-pen-nib"></i>
           </div>
@@ -514,179 +570,44 @@
           </div>
           <span class="nav-link-arrow"><i class="fa-solid fa-arrow-right"></i></span>
         </a>
-
       </div>
     </section>
 
-    <!-- Footer -->
     <footer class="fade-up fade-up-d5" style="margin-top: 48px; text-align: center; color: var(--fg-muted); font-size: 12px; opacity: 0.5; font-weight: 300;">
-      All data stored locally in your browser. Nothing leaves this machine.
+      Notes are also backed up in your browser's local storage.
     </footer>
-
   </main>
 
-  <!-- Toast element -->
   <div class="toast" id="toast"></div>
 
   <script>
-    // === State ===
-    const STORAGE_KEYS = {
-      notes: 'phd_notes',
-      events: 'phd_events',
-      theme: 'phd_theme'
-    };
-
-    // === Theme toggle ===
+    /* ========================================
+       Theme
+    ======================================== */
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
 
-    function setTheme(theme) {
-      html.setAttribute('data-theme', theme);
-      localStorage.setItem(STORAGE_KEYS.theme, theme);
-      const icon = themeToggle.querySelector('i');
-      icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    function setTheme(t) {
+      html.setAttribute('data-theme', t);
+      localStorage.setItem('phd_theme', t);
+      themeToggle.querySelector('i').className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
-
-    // Load saved theme
-    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) ||
+    const savedTheme = localStorage.getItem('phd_theme') ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setTheme(savedTheme);
+    themeToggle.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-    themeToggle.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      setTheme(current === 'dark' ? 'light' : 'dark');
-    });
-
-    // === Date display ===
-    const dateEl = document.getElementById('currentDate');
+    /* ========================================
+       Date
+    ======================================== */
     const now = new Date();
-    dateEl.textContent = now.toLocaleDateString('en-US', {
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', {
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
 
-    // === Notes ===
-    const notesArea = document.getElementById('notesArea');
-    const charCount = document.getElementById('charCount');
-    const saveIndicator = document.getElementById('saveIndicator');
-    const clearNotesBtn = document.getElementById('clearNotes');
-    let saveTimeout;
-
-    // Load saved notes
-    notesArea.value = localStorage.getItem(STORAGE_KEYS.notes) || '';
-    charCount.textContent = `${notesArea.value.length} characters`;
-
-    notesArea.addEventListener('input', () => {
-      charCount.textContent = `${notesArea.value.length} characters`;
-      // Debounced save
-      clearTimeout(saveTimeout);
-      saveTimeout.push || (saveTimeout = null);
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        localStorage.setItem(STORAGE_KEYS.notes, notesArea.value);
-        // Flash save indicator
-        saveIndicator.classList.add('visible');
-        setTimeout(() => saveIndicator.classList.remove('visible'), 1500);
-      }, 600);
-    });
-
-    clearNotesBtn.addEventListener('click', () => {
-      if (notesArea.value.trim() === '') return;
-      notesArea.value = '';
-      charCount.textContent = '0 characters';
-      localStorage.setItem(STORAGE_KEYS.notes, '');
-      saveIndicator.classList.add('visible');
-      setTimeout(() => saveIndicator.classList.remove('visible'), 1500);
-      showToast('Notes cleared');
-    });
-
-    // === Calendar Events ===
-    const eventForm = document.getElementById('eventForm');
-    const eventText = document.getElementById('eventText');
-    const eventDate = document.getElementById('eventDate');
-    const eventsList = document.getElementById('eventsList');
-    const emptyState = document.getElementById('emptyState');
-
-    // Set default date to today
-    eventDate.value = now.toISOString().split('T')[0];
-
-    let events = JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || '[]');
-
-    function formatBadgeDate(dateStr) {
-      const d = new Date(dateStr + 'T00:00:00');
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return `<div style="font-weight:600;">${d.getDate()}</div><div>${months[d.getMonth()]}</div>`;
-    }
-
-    function getDateClass(dateStr) {
-      const today = now.toISOString().split('T')[0];
-      if (dateStr === today) return 'today';
-      if (dateStr < today) return 'past';
-      return '';
-    }
-
-    function renderEvents() {
-      // Sort by date ascending
-      events.sort((a, b) => a.date.localeCompare(b.date));
-
-      // Remove all event items (keep empty state)
-      eventsList.querySelectorAll('.event-item').forEach(el => el.remove());
-
-      if (events.length === 0) {
-        emptyState.style.display = 'block';
-        return;
-      }
-      emptyState.style.display = 'none';
-
-      events.forEach((ev, idx) => {
-        const item = document.createElement('div');
-        item.className = 'event-item';
-        item.innerHTML = `
-          <div class="event-date-badge ${getDateClass(ev.date)}">${formatBadgeDate(ev.date)}</div>
-          <div style="flex: 1; min-width: 0;">
-            <div style="font-size: 14px; line-height: 1.4; word-break: break-word;">${escapeHtml(ev.text)}</div>
-          </div>
-          <button class="event-delete" data-idx="${idx}" aria-label="Delete event">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        `;
-        eventsList.appendChild(item);
-      });
-
-      // Bind delete buttons
-      eventsList.querySelectorAll('.event-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = parseInt(btn.getAttribute('data-idx'));
-          events.splice(idx, 1);
-          localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
-          renderEvents();
-        });
-      });
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    eventForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = eventText.value.trim();
-      const date = eventDate.value;
-      if (!text || !date) return;
-
-      events.push({ text, date, id: Date.now() });
-      localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
-      renderEvents();
-
-      eventText.value = '';
-      eventDate.value = now.toISOString().split('T')[0];
-      eventText.focus();
-    });
-
-    renderEvents();
-
-    // === Toast ===
+    /* ========================================
+       Toast
+    ======================================== */
     const toastEl = document.getElementById('toast');
     let toastTimer;
     function showToast(msg) {
@@ -696,16 +617,338 @@
       toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
     }
 
-    // === Keyboard shortcut: Ctrl+Shift+N to focus notes ===
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'N') {
-        e.preventDefault();
-        notesArea.focus();
+    /* ========================================
+       Notes — localStorage (fallback)
+    ======================================== */
+    const notesArea = document.getElementById('notesArea');
+    const charCount = document.getElementById('charCount');
+    const clearNotesBtn = document.getElementById('clearNotes');
+    let saveTimeout;
+
+    notesArea.value = localStorage.getItem('phd_notes') || '';
+    charCount.textContent = `${notesArea.value.length} characters`;
+
+    function saveToLocal() {
+      localStorage.setItem('phd_notes', notesArea.value);
+    }
+
+    notesArea.addEventListener('input', () => {
+      charCount.textContent = `${notesArea.value.length} characters`;
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveToLocal();
+        // Also auto-save to folder if connected
+        if (dirHandle && folderConnected) {
+          writeCurrentToFolder().catch(() => {});
+        }
+      }, 800);
+    });
+
+    clearNotesBtn.addEventListener('click', () => {
+      if (!notesArea.value.trim()) return;
+      notesArea.value = '';
+      charCount.textContent = '0 characters';
+      saveToLocal();
+      if (dirHandle && folderConnected) {
+        writeCurrentToFolder().catch(() => {});
       }
-      // Ctrl+Shift+E to focus event input
-      if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+      showToast('Notes cleared');
+    });
+
+    /* ========================================
+       File System Access API — .md folder saving
+    ======================================== */
+    const HAS_FS_API = 'showDirectoryPicker' in window;
+    const folderStatus = document.getElementById('folderStatus');
+    const folderStatusText = document.getElementById('folderStatusText');
+    const mdFilename = document.getElementById('mdFilename');
+    const saveToFolderBtn = document.getElementById('saveToFolderBtn');
+    const downloadMdBtn = document.getElementById('downloadMdBtn');
+    const fsNotice = document.getElementById('fsNotice');
+
+    let dirHandle = null;
+    let folderConnected = false;
+    const DB_NAME = 'phd_workspace_fs';
+    const DB_STORE = 'handles';
+    const HANDLE_KEY = 'notes_dir';
+
+    // Show/hide UI based on API support
+    if (!HAS_FS_API) {
+      saveToFolderBtn.style.display = 'none';
+      fsNotice.style.display = 'flex';
+    }
+
+    // --- IndexedDB helpers for persisting the directory handle ---
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(DB_STORE)) {
+            db.createObjectStore(DB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function storeDirHandle(handle) {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(handle, HANDLE_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function retrieveDirHandle() {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readonly');
+        const req = tx.objectStore(DB_STORE).get(HANDLE_KEY);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function removeDirHandle() {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).delete(HANDLE_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    // --- Permission verification ---
+    async function verifyPermission(handle) {
+      if (!handle) return false;
+      try {
+        if ((await handle.queryPermission({ mode: 'readwrite' })) === 'granted') return true;
+        if ((await handle.requestPermission({ mode: 'readwrite' })) === 'granted') return true;
+      } catch (e) {
+        // Permission denied or tab not focused
+      }
+      return false;
+    }
+
+    // --- Write .md file ---
+    async function writeCurrentToFolder() {
+      if (!dirHandle) return false;
+      let filename = mdFilename.value.trim();
+      if (!filename) filename = 'reminders.md';
+      if (!filename.endsWith('.md')) filename += '.md';
+
+      try {
+        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(notesArea.value);
+        await writable.close();
+        flashSavedStatus(filename);
+        return true;
+      } catch (e) {
+        console.error('Failed to write file:', e);
+        setDisconnected();
+        return false;
+      }
+    }
+
+    // --- UI state updates ---
+    function setConnected(folderName) {
+      folderConnected = true;
+      folderStatus.className = 'status-badge status-connected';
+      folderStatus.querySelector('i').className = 'fa-solid fa-folder-open';
+      folderStatusText.textContent = folderName || 'Connected';
+    }
+
+    function setDisconnected() {
+      folderConnected = false;
+      dirHandle = null;
+      folderStatus.className = 'status-badge status-disconnected';
+      folderStatus.querySelector('i').className = 'fa-solid fa-folder-closed';
+      folderStatusText.textContent = 'No folder';
+    }
+
+    function flashSavedStatus(filename) {
+      const prevClass = folderStatus.className;
+      const prevText = folderStatusText.textContent;
+      const prevIcon = folderStatus.querySelector('i').className;
+      folderStatus.className = 'status-badge status-saved';
+      folderStatus.querySelector('i').className = 'fa-solid fa-check';
+      folderStatusText.textContent = `Saved ${filename}`;
+      setTimeout(() => {
+        folderStatus.className = prevClass;
+        folderStatus.querySelector('i').className = prevIcon;
+        folderStatusText.textContent = prevText;
+      }, 2000);
+    }
+
+    // --- Save to folder button ---
+    saveToFolderBtn.addEventListener('click', async () => {
+      // If not connected, prompt for folder
+      if (!folderConnected || !dirHandle) {
+        try {
+          dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          await storeDirHandle(dirHandle);
+          setConnected(dirHandle.name);
+          showToast(`Connected to "${dirHandle.name}"`);
+          // Now write
+          const ok = await writeCurrentToFolder();
+          if (!ok) showToast('Could not write to folder');
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            showToast('Could not access folder');
+          }
+          return;
+        }
+      } else {
+        // Already connected — try to write, re-request permission if needed
+        const permitted = await verifyPermission(dirHandle);
+        if (!permitted) {
+          setDisconnected();
+          await removeDirHandle();
+          showToast('Permission lost — click Save again to reconnect');
+          return;
+        }
+        const ok = await writeCurrentToFolder();
+        if (!ok) showToast('Could not write to folder');
+      }
+    });
+
+    // --- Download .md fallback (works in all browsers) ---
+    downloadMdBtn.addEventListener('click', () => {
+      let filename = mdFilename.value.trim();
+      if (!filename) filename = 'reminders.md';
+      if (!filename.endsWith('.md')) filename += '.md';
+
+      const blob = new Blob([notesArea.value], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${filename}`);
+    });
+
+    // --- On page load: try to reconnect to previously saved folder ---
+    if (HAS_FS_API) {
+      (async () => {
+        try {
+          const stored = await retrieveDirHandle();
+          if (stored) {
+            const ok = await verifyPermission(stored);
+            if (ok) {
+              dirHandle = stored;
+              setConnected(stored.name);
+            } else {
+              // Permission expired, clean up
+              await removeDirHandle();
+            }
+          }
+        } catch (e) {
+          // IndexedDB error, silently fail
+        }
+      })();
+    }
+
+    // Right-click on folder status to disconnect
+    folderStatus.addEventListener('contextmenu', async (e) => {
+      if (!folderConnected) return;
+      e.preventDefault();
+      setDisconnected();
+      await removeDirHandle();
+      showToast('Folder disconnected');
+    });
+    folderStatus.title = folderConnected
+      ? 'Connected. Right-click to disconnect.'
+      : 'Click Save to connect a folder.';
+
+    /* ========================================
+       Calendar Events
+    ======================================== */
+    const eventForm = document.getElementById('eventForm');
+    const eventText = document.getElementById('eventText');
+    const eventDate = document.getElementById('eventDate');
+    const eventsList = document.getElementById('eventsList');
+    const emptyState = document.getElementById('emptyState');
+
+    eventDate.value = now.toISOString().split('T')[0];
+    let events = JSON.parse(localStorage.getItem('phd_events') || '[]');
+
+    function formatBadgeDate(ds) {
+      const d = new Date(ds + 'T00:00:00');
+      const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `<div style="font-weight:600;">${d.getDate()}</div><div>${m[d.getMonth()]}</div>`;
+    }
+    function getDateClass(ds) {
+      const today = now.toISOString().split('T')[0];
+      if (ds === today) return 'today';
+      if (ds < today) return 'past';
+      return '';
+    }
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function renderEvents() {
+      events.sort((a, b) => a.date.localeCompare(b.date));
+      eventsList.querySelectorAll('.event-item').forEach(el => el.remove());
+      if (events.length === 0) { emptyState.style.display = 'block'; return; }
+      emptyState.style.display = 'none';
+      events.forEach((ev, idx) => {
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        item.innerHTML = `
+          <div class="event-date-badge ${getDateClass(ev.date)}">${formatBadgeDate(ev.date)}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:14px; line-height:1.4; word-break:break-word;">${escapeHtml(ev.text)}</div>
+          </div>
+          <button class="event-delete" data-idx="${idx}" aria-label="Delete event">
+            <i class="fa-solid fa-xmark"></i>
+          </button>`;
+        eventsList.appendChild(item);
+      });
+      eventsList.querySelectorAll('.event-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          events.splice(parseInt(btn.dataset.idx), 1);
+          localStorage.setItem('phd_events', JSON.stringify(events));
+          renderEvents();
+        });
+      });
+    }
+
+    eventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const t = eventText.value.trim(), d = eventDate.value;
+      if (!t || !d) return;
+      events.push({ text: t, date: d, id: Date.now() });
+      localStorage.setItem('phd_events', JSON.stringify(events));
+      renderEvents();
+      eventText.value = '';
+      eventDate.value = now.toISOString().split('T')[0];
+      eventText.focus();
+    });
+    renderEvents();
+
+    /* ========================================
+       Keyboard shortcuts
+    ======================================== */
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'N') { e.preventDefault(); notesArea.focus(); }
+      if (e.ctrlKey && e.shiftKey && e.key === 'E') { e.preventDefault(); eventText.focus(); }
+      if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        eventText.focus();
+        saveToLocal();
+        if (dirHandle && folderConnected) writeCurrentToFolder().catch(() => {});
+        else downloadMdBtn.click();
       }
     });
   </script>
