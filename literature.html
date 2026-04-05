@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Literature — PhD Workspace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #F5F0E8;
+      --bg-deep: #EDE7DB;
+      --fg: #2C2416;
+      --fg-muted: #8A7E6B;
+      --accent: #C0582A;
+      --accent-hover: #A84A22;
+      --card: #FDFAF5;
+      --card-border: #E0D8CA;
+      --shadow: rgba(44, 36, 22, 0.06);
+      --shadow-lg: rgba(44, 36, 22, 0.1);
+      --tag-bg: #EDE4D4;
+      --success: #4A7A58;
+      --success-bg: #D8E8DC;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1A1714;
+      --bg-deep: #141210;
+      --fg: #E8E0D4;
+      --fg-muted: #8A7E6B;
+      --accent: #D4713E;
+      --accent-hover: #E8854F;
+      --card: #23201B;
+      --card-border: #3A352D;
+      --shadow: rgba(0,0,0,0.2);
+      --shadow-lg: rgba(0,0,0,0.35);
+      --tag-bg: #2E2A23;
+      --success: #5EA872;
+      --success-bg: #1E2E22;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      transition: background-color 0.4s ease, color 0.4s ease;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 { font-family: 'Source Serif 4', serif; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    .ambient-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.1;
+      transition: opacity 0.4s ease;
+    }
+    [data-theme="dark"] .ambient-blob { opacity: 0.05; }
+
+    .blob-1 {
+      width: 450px; height: 450px;
+      background: #D8E4DC;
+      top: -120px; right: -80px;
+      animation: blobFloat1 22s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 350px; height: 350px;
+      background: #8B7355;
+      bottom: -80px; left: -60px;
+      animation: blobFloat2 28s ease-in-out infinite;
+    }
+
+    @keyframes blobFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-30px, 25px) scale(1.06); }
+      66% { transform: translate(15px, -15px) scale(0.94); }
+    }
+    @keyframes blobFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(25px, -30px) scale(1.07); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease;
+    }
+    .card:hover { box-shadow: 0 4px 20px var(--shadow-lg); }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 6px 0;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link i { transition: transform 0.2s ease; }
+    .back-link:hover i { transform: translateX(-3px); }
+
+    .form-select {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.4s ease;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A7E6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      width: 100%;
+    }
+    .form-select:focus { border-color: var(--accent); }
+
+    .summary-area {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: vertical;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--fg);
+      caret-color: var(--accent);
+    }
+    .summary-area::placeholder { color: var(--fg-muted); opacity: 0.5; }
+
+    .theme-toggle {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.25s ease;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Save indicator */
+    .save-flash {
+      font-size: 12px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .save-flash.visible { opacity: 1; }
+
+    /* Paper list items */
+    .paper-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.4s ease;
+    }
+    .paper-row:last-child { border-bottom: none; }
+    .paper-row:hover { background: var(--bg-deep); }
+    .paper-row.active { background: var(--tag-bg); }
+
+    .paper-icon {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: var(--tag-bg);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background 0.4s ease;
+    }
+
+    .paper-preview {
+      font-size: 12px;
+      color: var(--fg-muted);
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .paper-filepath {
+      font-size: 11px;
+      color: var(--fg-muted);
+      opacity: 0.45;
+      font-weight: 300;
+      margin-left: auto;
+      flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Reader layout */
+    .reader-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      height: calc(100vh - 300px);
+      min-height: 500px;
+    }
+
+    .pdf-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 8px;
+      background: var(--bg-deep);
+    }
+
+    /* Empty reader state */
+    .reader-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--fg-muted);
+      opacity: 0.4;
+      text-align: center;
+      padding: 40px;
+    }
+    .reader-empty i { font-size: 48px; margin-bottom: 16px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--fg);
+      color: var(--bg);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 8px 30px var(--shadow-lg);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+    .fade-up-d1 { animation-delay: 0.06s; }
+    .fade-up-d2 { animation-delay: 0.14s; }
+    .fade-up-d3 { animation-delay: 0.22s; }
+    .fade-up-d4 { animation-delay: 0.30s; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .reader-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: auto;
+      }
+      .reader-grid .pdf-wrap { height: 60vh; min-height: 350px; }
+      .reader-grid .summary-wrap { min-height: 300px; }
+      .paper-filepath { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-blob blob-1"></div>
+  <div class="ambient-blob blob-2"></div>
+
+  <!-- Header -->
+  <header style="position: relative; z-index: 1; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto;">
+    <div class="fade-up">
+      <a href="index.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Workspace
+      </a>
+      <h1 style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-top: 8px;">Literature</h1>
+      <p style="font-size: 14px; color: var(--fg-muted); font-weight: 300; margin-top: 4px;" id="paperCount">0 papers</p>
+    </div>
+    <div class="fade-up fade-up-d1">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main style="position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 32px 80px;">
+
+    <!-- Paper selector -->
+    <div class="card fade-up fade-up-d2" style="padding: 16px 24px; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <i class="fa-solid fa-file-pdf" style="color: var(--accent); font-size: 15px;"></i>
+        <select class="form-select" id="paperSelect" aria-label="Select a paper">
+          <option value="">Choose a paper to read...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Reader: PDF + Summary side by side -->
+    <div class="reader-grid fade-up fade-up-d3" id="readerGrid">
+
+      <!-- PDF panel -->
+      <div class="card pdf-wrap" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div id="pdfEmpty" class="reader-empty">
+          <i class="fa-regular fa-file-pdf"></i>
+          <p style="font-size: 15px;">Select a paper above</p>
+          <p style="font-size: 13px; margin-top: 4px;">The PDF will appear here for reading</p>
+        </div>
+        <iframe id="pdfFrame" class="pdf-frame" style="display: none;" title="PDF viewer"></iframe>
+      </div>
+
+      <!-- Summary panel -->
+      <div class="card summary-wrap" style="padding: 0; display: flex; flex-direction: column;">
+        <div style="padding: 16px 20px 0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4A7A58;"></div>
+            <h2 style="font-size: 15px; font-weight: 700;" id="summaryTitle">Summary</h2>
+          </div>
+          <span class="save-flash" id="saveFlash">
+            <i class="fa-solid fa-check" style="font-size: 10px;"></i> Saved
+          </span>
+        </div>
+        <div style="padding: 12px 20px 16px; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+          <textarea
+            class="summary-area"
+            id="summaryArea"
+            placeholder="Write your summary here while reading the paper...&#10;&#10;Key findings:&#10;Methods used:&#10;Relevance to my work:&#10;Questions to follow up:"
+            spellcheck="false"
+            aria-label="Paper summary"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paper list -->
+    <section class="fade-up fade-up-d4" style="margin-top: 28px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--fg-muted);"></div>
+        <h2 style="font-size: 16px; font-weight: 700;">All Papers</h2>
+      </div>
+      <div class="card" style="overflow: hidden;" id="paperListCard">
+        <div id="paperList"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* =============================================
+       PAPER CONFIGURATION
+       Add your papers here — title and filename.
+       Files should live in the papers/ directory.
+    ============================================= */
+    const PAPERS = [
+      {
+        title: "Smith et al. 2024 — CRISPR efficiency in mammalian cells",
+        file: "smith-2024-crispr.pdf"
+      },
+      {
+        title: "Jones & Lee 2023 — Single-cell RNA-seq of tumor microenvironment",
+        file: "jones-lee-2023-scrna.pdf"
+      },
+      {
+        title: "Chen et al. 2023 — AlphaFold predictions for membrane proteins",
+        file: "chen-2023-alphafold.pdf"
+      },
+      // Add more papers like this:
+      // { title: "Author et al. Year — Short description", file: "filename.pdf" },
+    ];
+
+    /* =============================================
+       Theme
+    ============================================= */
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+
+    function setTheme(t) {
+      htmlEl.setAttribute('data-theme', t);
+      localStorage.setItem('phd_theme', t);
+      themeToggle.querySelector('i').className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+    const savedTheme = localStorage.getItem('phd_theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+    themeToggle.addEventListener('click', () => setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+    /* =============================================
+       Toast
+    ============================================= */
+    const toastEl = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+    }
+
+    /* =============================================
+       State
+    ============================================= */
+    const SUMMARY_KEY = 'phd_lit_summaries';
+    let summaries = JSON.parse(localStorage.getItem(SUMMARY_KEY) || '{}');
+    let currentFile = null;
+    let saveTimeout;
+
+    /* =============================================
+       DOM
+    ============================================= */
+    const paperSelect = document.getElementById('paperSelect');
+    const pdfFrame = document.getElementById('pdfFrame');
+    const pdfEmpty = document.getElementById('pdfEmpty');
+    const summaryArea = document.getElementById('summaryArea');
+    const summaryTitle = document.getElementById('summaryTitle');
+    const saveFlash = document.getElementById('saveFlash');
+    const paperList = document.getElementById('paperList');
+    const paperCount = document.getElementById('paperCount');
+
+    /* =============================================
+       Build UI
+    ============================================= */
+    paperCount.textContent = `${PAPERS.length} paper${PAPERS.length !== 1 ? 's' : ''}`;
+
+    // Populate dropdown
+    PAPERS.forEach((p, i) => {
+      const opt = document.createElement('option');
+      opt.value = p.file;
+      opt.textContent = p.title;
+      paperSelect.appendChild(opt);
+    });
+
+    // Build paper list
+    function renderPaperList() {
+      paperList.innerHTML = '';
+      PAPERS.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'paper-row' + (currentFile === p.file ? ' active' : '');
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('aria-label', `Read ${p.title}`);
+
+        const summaryPreview = summaries[p.file]
+          ? summaries[p.file].substring(0, 120).replace(/\n/g, ' ')
+          : 'No summary yet';
+
+        row.innerHTML = `
+          <div class="paper-icon"><i class="fa-solid fa-file-pdf"></i></div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(p.title)}</div>
+            <div class="paper-preview">${escapeHtml(summaryPreview)}</div>
+          </div>
+          <span class="paper-filepath">papers/${escapeHtml(p.file)}</span>
+        `;
+
+        row.addEventListener('click', () => loadPaper(p.file));
+        row.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadPaper(p.file); }
+        });
+        paperList.appendChild(row);
+      });
+    }
+    renderPaperList();
+
+    /* =============================================
+       Load paper
+    ============================================= */
+    function loadPaper(file) {
+      // Save current summary first
+      saveCurrentSummary();
+
+      currentFile = file;
+      paperSelect.value = file;
+
+      // Load PDF
+      pdfFrame.src = `papers/${file}`;
+      pdfFrame.style.display = 'block';
+      pdfEmpty.style.display = 'none';
+
+      // Update title
+      const paper = PAPERS.find(p => p.file === file);
+      summaryTitle.textContent = paper ? paper.title : 'Summary';
+
+      // Load summary
+      summaryArea.value = summaries[file] || '';
+
+      // Re-render list to update active state
+      renderPaperList();
+
+      // Scroll reader into view
+      document.getElementById('readerGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    paperSelect.addEventListener('change', () => {
+      if (paperSelect.value) loadPaper(paperSelect.value);
+    });
+
+    /* =============================================
+       Save summaries
+    ============================================= */
+    function saveCurrentSummary() {
+      if (!currentFile) return;
+      if (summaryArea.value.trim()) {
+        summaries[currentFile] = summaryArea.value;
+      } else {
+        delete summaries[currentFile];
+      }
+      localStorage.setItem(SUMMARY_KEY, JSON.stringify(summaries));
+    }
+
+    function flashSave() {
+      saveFlash.classList.add('visible');
+      setTimeout(() => saveFlash.classList.remove('visible'), 1500);
+    }
+
+    summaryArea.addEventListener('input', () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveCurrentSummary();
+        flashSave();
+        renderPaperList();
+      }, 600);
+    });
+
+    // Save on page unload
+    window.addEventListener('beforeunload', saveCurrentSummary);
+
+    /* =============================================
+       Keyboard shortcuts
+    ============================================= */
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+S saves summary
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveCurrentSummary();
+        flashSave();
+        renderPaperList();
+        showToast('Summary saved');
+      }
+      // Ctrl+Shift+P focuses paper selector
+      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        paperSelect.focus();
+      }
+    });
+
+    /* =============================================
+       Helpers
+    ============================================= */
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
